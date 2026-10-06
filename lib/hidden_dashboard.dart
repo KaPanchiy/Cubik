@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'modelos/incident_model.dart';
+import 'services/diary_service.dart';
 import 'services/secret_code_service.dart';
 
 void main() {
@@ -942,18 +944,509 @@ class DigitalSafetyScreen extends StatelessWidget {
   }
 }
 
-class DiaryScreen extends StatelessWidget {
+// =====================================================================
+// ECRÃ DO DIÁRIO SECRETO DE EVIDÊNCIAS
+// =====================================================================
+class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
 
   @override
+  State<DiaryScreen> createState() => _DiaryScreenState();
+}
+
+class _DiaryScreenState extends State<DiaryScreen> {
+  List<IncidentEntry> _incidents = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadIncidents();
+  }
+
+  Future<void> _loadIncidents() async {
+    setState(() => _isLoading = true);
+    final list = await DiaryService.getIncidents();
+    if (mounted) {
+      setState(() {
+        _incidents = list;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _deleteIncident(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar Registo'),
+        content: const Text('Tens a certeza de que queres eliminar este registo de incidente do diário?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Eliminar', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await DiaryService.deleteIncident(id);
+      _loadIncidents();
+    }
+  }
+
+  void _showAddIncidentDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => AddIncidentModal(
+        onSaved: _loadIncidents,
+      ),
+    );
+  }
+
+  Color _getSeverityColor(String severity) {
+    switch (severity) {
+      case 'Elevado':
+        return Colors.red.shade700;
+      case 'Médio':
+        return Colors.orange.shade800;
+      case 'Baixo':
+      default:
+        return Colors.green.shade700;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24.0),
-        child: Text(
-          'Registo de Diário / Ocorrências\n(Espaço seguro e encriptado para apontar incidentes)',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, height: 1.5),
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFAFA),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadIncidents,
+              child: ListView(
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  // Banner de Segurança e Instruções Legais
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1565C0).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.shield, color: Color(0xFF1565C0), size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Diário Secreto de Evidências 📓',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1565C0)),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Estes registos são guardados exclusivamente no teu dispositivo. Podes anotar episódios, datas e detalhes para servirem de prova junto da APAV ou autoridades.',
+                                style: TextStyle(fontSize: 13, color: Colors.grey.shade800, height: 1.4),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Lista de Incidentes ou Estado Vazio
+                  if (_incidents.isEmpty)
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          children: [
+                            Icon(Icons.menu_book, size: 54, color: Colors.grey.shade400),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Nenhum Incidente Registado',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'O teu diário está limpo. Clica no botão abaixo sempre que precisares de registar um evento em segurança.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    ..._incidents.map((incident) {
+                      final severityColor = _getSeverityColor(incident.severity);
+                      final formattedDate =
+                          '${incident.date.day.toString().padLeft(2, '0')}/${incident.date.month.toString().padLeft(2, '0')}/${incident.date.year} às ${incident.date.hour.toString().padLeft(2, '0')}:${incident.date.minute.toString().padLeft(2, '0')}';
+
+                      return Card(
+                        elevation: 3,
+                        margin: const EdgeInsets.only(bottom: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Faixa Lateral Indicadora da Gravidade
+                                Container(
+                                  width: 6,
+                                  color: severityColor,
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // Badge da Data
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  formattedDate,
+                                                  style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
+                                                ),
+                                              ],
+                                            ),
+                                            // Badge da Gravidade
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: severityColor.withValues(alpha: 0.12),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                'Gravidade: ${incident.severity}',
+                                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: severityColor),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          incident.title,
+                                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.shade50,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            incident.category,
+                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue.shade800),
+                                          ),
+                                        ),
+                                        if (incident.description.isNotEmpty) ...[
+                                          const Divider(height: 16),
+                                          Text(
+                                            incident.description,
+                                            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
+                                          ),
+                                        ],
+                                        const SizedBox(height: 8),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: IconButton(
+                                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                            tooltip: 'Eliminar registo',
+                                            onPressed: () => _deleteIncident(incident.id),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF1565C0),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Registar Incidente', style: TextStyle(fontWeight: FontWeight.bold)),
+        onPressed: _showAddIncidentDialog,
+      ),
+    );
+  }
+}
+
+// =====================================================================
+// MODAL DE REGISTO DE NOVO INCIDENTE
+// =====================================================================
+class AddIncidentModal extends StatefulWidget {
+  final VoidCallback onSaved;
+
+  const AddIncidentModal({super.key, required this.onSaved});
+
+  @override
+  State<AddIncidentModal> createState() => _AddIncidentModalState();
+}
+
+class _AddIncidentModalState extends State<AddIncidentModal> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
+  String _selectedCategory = 'Violência Psicológica';
+  String _selectedSeverity = 'Médio';
+
+  final List<String> _categories = [
+    'Violência Psicológica',
+    'Violência Física',
+    'Violência Financeira',
+    'Violência Sexual',
+    'Stalking / Perseguição',
+    'Outro',
+  ];
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
+  Future<void> _saveForm() async {
+    if (_formKey.currentState!.validate()) {
+      final finalDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _selectedTime.hour,
+        _selectedTime.minute,
+      );
+
+      final entry = IncidentEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: _titleController.text.trim(),
+        date: finalDateTime,
+        category: _selectedCategory,
+        severity: _selectedSeverity,
+        description: _descController.text.trim(),
+      );
+
+      await DiaryService.addIncident(entry);
+      widget.onSaved();
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final formattedDate = '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}';
+    final formattedTime = '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 20,
+        right: 20,
+        top: 20,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Novo Registo no Diário 📓',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1565C0)),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 10),
+
+              // Data e Hora
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.calendar_today, size: 18),
+                      label: Text(formattedDate),
+                      onPressed: _pickDate,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.access_time, size: 18),
+                      label: Text(formattedTime),
+                      onPressed: _pickTime,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              // Categoria
+              DropdownButtonFormField<String>(
+                initialValue: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText: 'Tipo de Violência / Categoria',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: _categories.map((cat) {
+                  return DropdownMenuItem(value: cat, child: Text(cat));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedCategory = val);
+                },
+              ),
+              const SizedBox(height: 14),
+
+              // Gravidade / Risco
+              const Text('Nível de Gravidade / Risco:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: ['Baixo', 'Médio', 'Elevado'].map((sev) {
+                  final isSelected = _selectedSeverity == sev;
+                  Color color = Colors.green;
+                  if (sev == 'Médio') color = Colors.orange.shade800;
+                  if (sev == 'Elevado') color = Colors.red.shade700;
+
+                  return ChoiceChip(
+                    label: Text(sev),
+                    selected: isSelected,
+                    selectedColor: color.withValues(alpha: 0.2),
+                    side: BorderSide(color: isSelected ? color : Colors.grey),
+                    labelStyle: TextStyle(
+                      color: isSelected ? color : Colors.black87,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    onSelected: (selected) {
+                      if (selected) setState(() => _selectedSeverity = sev);
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 14),
+
+              // Título
+              TextFormField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  labelText: 'Título / Resumo Curto',
+                  hintText: 'Ex: Ameaça verbal na cozinha',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Escreve um título para o incidente.';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 14),
+
+              // Descrição
+              TextFormField(
+                controller: _descController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  labelText: 'Descrição Detalhada',
+                  hintText: 'Descreve o que aconteceu, frases ditas, testemunhas presentes, chamadas ou mensagens...',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Botão Guardar
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1565C0),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: _saveForm,
+                  child: const Text('Guardar no Diário', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
