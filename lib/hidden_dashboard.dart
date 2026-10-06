@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'services/secret_code_service.dart';
 
 void main() {
   runApp(
@@ -25,6 +26,7 @@ class DashboardModel extends ChangeNotifier {
     {'icon': Icons.info_outline, 'title': 'Aconselhamento e Apoio', 'screen': const SupportScreen()},
     {'icon': Icons.menu_book, 'title': 'Guia de segurança digital', 'screen': const DigitalSafetyScreen()},
     {'icon': Icons.grid_view, 'title': 'Recursos Úteis', 'screen': const ResourcesScreen()},
+    {'icon': Icons.lock_outline, 'title': 'Alterar Código Secreto', 'screen': const ChangePinScreen()},
   ];
 }
 
@@ -73,7 +75,7 @@ class HiddenDashboard extends StatelessWidget {
         icon: const Icon(Icons.exit_to_app),
         label: const Text('Sair Rápido', style: TextStyle(fontWeight: FontWeight.bold)),
         onPressed: () {
-          debugPrint('Sair rápido acionado!');
+          Navigator.of(context).popUntil((route) => route.isFirst);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -274,7 +276,7 @@ class TypesScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1565C0).withOpacity(0.1),
+                        color: const Color(0xFF1565C0).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(item['icon'], size: 32, color: const Color(0xFF1565C0)),
@@ -408,9 +410,9 @@ class TypeDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1565C0).withOpacity(0.05),
+                color: const Color(0xFF1565C0).withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1565C0).withOpacity(0.3)),
+                border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.3)),
               ),
               child: Text(
                 help,
@@ -580,7 +582,7 @@ class _QuizScreenState extends State<QuizScreen> {
                         style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
                       ),
                       Chip(
-                        backgroundColor: const Color(0xFF1565C0).withOpacity(0.1),
+                        backgroundColor: const Color(0xFF1565C0).withValues(alpha: 0.1),
                         label: Text(
                           _isForMe! ? 'Contexto Próprio' : 'Contexto de Amizade',
                           style: const TextStyle(fontSize: 11, color: Color(0xFF1565C0)),
@@ -681,7 +683,7 @@ class QuizResultView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: headerColor.withOpacity(0.1),
+            color: headerColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: headerColor, width: 1.5),
           ),
@@ -993,6 +995,189 @@ class EmergencyScreen extends StatelessWidget {
               onPressed: () {
                 debugPrint('Chamada de emergência 112 acionada');
               },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// =====================================================================
+// ECRÃ DE ALTERAÇÃO DE CÓDIGO/SENHA SECRETA
+// =====================================================================
+class ChangePinScreen extends StatefulWidget {
+  const ChangePinScreen({super.key});
+
+  @override
+  State<ChangePinScreen> createState() => _ChangePinScreenState();
+}
+
+class _ChangePinScreenState extends State<ChangePinScreen> {
+  final TextEditingController _pinController = TextEditingController();
+  final TextEditingController _confirmPinController = TextEditingController();
+  String _currentPin = SecretCodeService.defaultCode;
+  String? _statusMessage;
+  bool _isSuccess = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentPin();
+  }
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    _confirmPinController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadCurrentPin() async {
+    final pin = await SecretCodeService.getSecretCode();
+    if (mounted) {
+      setState(() {
+        _currentPin = pin;
+      });
+    }
+  }
+
+  Future<void> _saveNewPin() async {
+    final newPin = _pinController.text.trim();
+    final confirmPin = _confirmPinController.text.trim();
+
+    if (newPin.isEmpty) {
+      setState(() {
+        _statusMessage = 'Por favor, escreve um novo código/senha.';
+        _isSuccess = false;
+      });
+      return;
+    }
+
+    if (newPin != confirmPin) {
+      setState(() {
+        _statusMessage = 'Os dois códigos não coincidem. Tenta novamente.';
+        _isSuccess = false;
+      });
+      return;
+    }
+
+    await SecretCodeService.setSecretCode(newPin);
+    if (mounted) {
+      setState(() {
+        _currentPin = newPin;
+        _statusMessage = 'Código secreto alterado com sucesso!';
+        _isSuccess = true;
+        _pinController.clear();
+        _confirmPinController.clear();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Alterar Código Secreto')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(
+              child: Icon(Icons.security, size: 64, color: Color(0xFF1565C0)),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Personaliza o teu Código de Acesso',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Este é o código que deves introduzir na caixa "Resgatar Código" do jogo para abrir este painel oculto.',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.4),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1565C0).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Color(0xFF1565C0)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Código secreto atual: "$_currentPin"',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1565C0), fontSize: 15),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _pinController,
+              decoration: InputDecoration(
+                labelText: 'Novo Código Secreto',
+                hintText: 'Ex: 5678 ou OMEUCODIGO',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.lock_open),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _confirmPinController,
+              decoration: InputDecoration(
+                labelText: 'Confirmar Novo Código',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.lock),
+              ),
+            ),
+            if (_statusMessage != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _isSuccess ? Colors.green.shade300 : Colors.red.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isSuccess ? Icons.check_circle : Icons.error_outline,
+                      color: _isSuccess ? Colors.green.shade800 : Colors.red.shade800,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _statusMessage!,
+                        style: TextStyle(
+                          color: _isSuccess ? Colors.green.shade800 : Colors.red.shade800,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1565C0),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: _saveNewPin,
+                child: const Text('Guardar Novo Código', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
             ),
           ],
         ),

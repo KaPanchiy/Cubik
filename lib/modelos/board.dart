@@ -13,8 +13,17 @@ class Board {
 
   int score = 0;
 
+  void reset() {
+    grid = List.generate(
+      rows,
+      (_) => List.generate(columns, (_) => null),
+    );
+    score = 0;
+  }
+
   // Verifica se a peça pode ser colocada numa determinada posição (row, col)
   bool canPlacePiece(Piece piece, int startRow, int startCol) {
+    if (startRow < 0 || startCol < 0) return false;
     for (int r = 0; r < piece.shape.length; r++) {
       for (int c = 0; c < piece.shape[r].length; c++) {
         if (piece.shape[r][c] == 1) {
@@ -32,24 +41,52 @@ class Board {
     return true;
   }
 
-  // Coloca a peça na grelha e verifica se há linhas/colunas para eliminar
-  bool placePiece(Piece piece, int startRow, int startCol) {
-    if (!canPlacePiece(piece, startRow, startCol)) return false;
+  // Verifica se uma determinada peça cabe em QUALQUER posição do tabuleiro 8x8
+  bool canPlaceSomewhere(Piece piece) {
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < columns; c++) {
+        if (canPlacePiece(piece, r, c)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
+  // Verifica se pelo menos UMA das peças disponíveis cabe no tabuleiro
+  bool canPlaceAnyPiece(List<Piece> availablePieces) {
+    if (availablePieces.isEmpty) return true;
+    for (var piece in availablePieces) {
+      if (canPlaceSomewhere(piece)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Coloca a peça na grelha e verifica se há linhas/colunas para eliminar
+  int placePiece(Piece piece, int startRow, int startCol) {
+    if (!canPlacePiece(piece, startRow, startCol)) return 0;
+
+    int blocksPlaced = 0;
     for (int r = 0; r < piece.shape.length; r++) {
       for (int c = 0; c < piece.shape[r].length; c++) {
         if (piece.shape[r][c] == 1) {
           grid[startRow + r][startCol + c] = piece.color;
+          blocksPlaced++;
         }
       }
     }
 
-    _clearLinesAndColumns();
-    return true;
+    // Pontos base pela colocação de blocos
+    score += blocksPlaced;
+
+    int clearedLines = _clearLinesAndColumns();
+    return clearedLines;
   }
 
-  // Limpa as linhas e colunas completamente cheias e atualiza a pontuação
-  void _clearLinesAndColumns() {
+  // Limpa as linhas e colunas completamente cheias e atualiza a pontuação com combo
+  int _clearLinesAndColumns() {
     List<int> rowsToClear = [];
     List<int> colsToClear = [];
 
@@ -86,8 +123,13 @@ class Board {
       }
     }
 
-    // Incrementar a pontuação (10 pontos por linha/coluna eliminada)
     int clearedCount = rowsToClear.length + colsToClear.length;
-    score += clearedCount * 10;
+    if (clearedCount > 0) {
+      // Bónus de Combo (1 linha = 10, 2 linhas = 30, 3 linhas = 60, etc.)
+      int pointsEarned = clearedCount * 10 + (clearedCount - 1) * 10;
+      score += pointsEarned;
+    }
+
+    return clearedCount;
   }
 }
