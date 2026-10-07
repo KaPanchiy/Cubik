@@ -41,6 +41,53 @@ class Board {
     return true;
   }
 
+  /// Retorna as linhas e colunas que SERIAM completadas se a peça fosse colocada em (startRow, startCol)
+  ({List<int> rows, List<int> cols}) getCompletableLines(
+      Piece piece, int startRow, int startCol) {
+    if (!canPlacePiece(piece, startRow, startCol)) {
+      return (rows: <int>[], cols: <int>[]);
+    }
+
+    // Criar cópia temporária da grelha
+    List<List<Color?>> tempGrid = List.generate(
+      rows,
+      (r) => List.generate(columns, (c) => grid[r][c]),
+    );
+
+    // Colocar a peça na grelha temporária
+    for (int r = 0; r < piece.shape.length; r++) {
+      for (int c = 0; c < piece.shape[r].length; c++) {
+        if (piece.shape[r][c] == 1) {
+          tempGrid[startRow + r][startCol + c] = piece.color;
+        }
+      }
+    }
+
+    List<int> fullRows = [];
+    List<int> fullCols = [];
+
+    // Verificar linhas cheias
+    for (int r = 0; r < rows; r++) {
+      if (tempGrid[r].every((cell) => cell != null)) {
+        fullRows.add(r);
+      }
+    }
+
+    // Verificar colunas cheias
+    for (int c = 0; c < columns; c++) {
+      bool isFull = true;
+      for (int r = 0; r < rows; r++) {
+        if (tempGrid[r][c] == null) {
+          isFull = false;
+          break;
+        }
+      }
+      if (isFull) fullCols.add(c);
+    }
+
+    return (rows: fullRows, cols: fullCols);
+  }
+
   // Verifica se uma determinada peça cabe em QUALQUER posição do tabuleiro 8x8
   bool canPlaceSomewhere(Piece piece) {
     for (int r = 0; r < rows; r++) {

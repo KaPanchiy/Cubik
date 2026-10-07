@@ -16,15 +16,86 @@ class GameBoardWidget extends StatefulWidget {
   State<GameBoardWidget> createState() => _GameBoardWidgetState();
 }
 
-class _GameBoardWidgetState extends State<GameBoardWidget> {
+class _GameBoardWidgetState extends State<GameBoardWidget>
+    with TickerProviderStateMixin {
   int? _hoverRow;
   int? _hoverCol;
   Piece? _hoverPiece;
 
+  // Animação para colocar peça (Placement Pop)
+  late AnimationController _popController;
+  late Animation<double> _popAnimation;
+  Set<int> _recentlyPlacedIndices = {};
+
+  // Animação para eliminação de linha (Line Clear Flash)
+  late AnimationController _clearController;
+  late Animation<double> _clearAnimation;
+  Set<int> _clearingIndices = {};
+
+  @override
+  void initState() {
+    super.initState();
+
+    _popController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _popAnimation = Tween<double>(begin: 1.18, end: 1.0).animate(
+      CurvedAnimation(parent: _popController, curve: Curves.easeOutBack),
+    );
+
+    _clearController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _clearAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _clearController, curve: Curves.easeInBack),
+    );
+  }
+
+  @override
+  void dispose() {
+    _popController.dispose();
+    _clearController.dispose();
+    super.dispose();
+  }
+
+  void _triggerPlacementPop(Set<int> indices) {
+    setState(() {
+      _recentlyPlacedIndices = indices;
+    });
+    _popController.forward(from: 0.0);
+  }
+
+  void triggerLineClearAnimation(Set<int> indices, VoidCallback onComplete) {
+    setState(() {
+      _clearingIndices = indices;
+    });
+    _clearController.forward(from: 0.0).then((_) {
+      setState(() {
+        _clearingIndices = {};
+      });
+      onComplete();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     const double boardSize = 320.0;
-    const double cellSize = (boardSize - 16) / 8; // 8x8 grid with padding
+
+    // Calcular se o hover atual vai completar alguma linha ou coluna inteira
+    List<int> completableRows = [];
+    List<int> completableCols = [];
+
+    if (_hoverPiece != null && _hoverRow != null && _hoverCol != null) {
+      final res = widget.board.getCompletableLines(
+        _hoverPiece!,
+        _hoverRow!,
+        _hoverCol!,
+      );
+      completableRows = res.rows;
+      completableCols = res.cols;
+    }
 
     return Container(
       width: boardSize,
@@ -55,9 +126,8 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
           int col = index % Board.columns;
           Color? cellColor = widget.board.grid[row][col];
 
-          // Verifica se esta célula deve mostrar pré-visualização ao arrastar
-          bool isHovered = false;
-          Color? previewColor;
+          bool isPieceHoverSlot = false;
+          Color? hoverPieceColor;
 
           if (_hoverPiece != null && _hoverRow != null && _hoverCol != null) {
             int rOffset = row - _hoverRow!;
@@ -68,12 +138,21 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
                 cOffset < _hoverPiece!.columns) {
               if (_hoverPiece!.shape[rOffset][cOffset] == 1) {
                 if (widget.board.canPlacePiece(_hoverPiece!, _hoverRow!, _hoverCol!)) {
-                  isHovered = true;
-                  previewColor = _hoverPiece!.color.withValues(alpha: 0.45);
+                  isPieceHoverSlot = true;
+                  hoverPieceColor = _hoverPiece!.color;
                 }
               }
             }
           }
+
+          // Verifica se a célula faz parte de uma LINHA ou COLUNA COMPLETADA pelo hover
+          bool isLineCompletionHighlight = (completableRows.contains(row) ||
+                  completableCols.contains(col)) &&
+              (_hoverPiece != null);
+
+          // Verifica se a célula está em animação de eliminação ou colocação
+          bool isClearing = _clearingIndices.contains(index);
+          bool isPop = _recentlyPlacedIndices.contains(index);
 
           return DragTarget<Piece>(
             onWillAcceptWithDetails: (details) {
@@ -92,19 +171,77 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
               });
             },
             onAcceptWithDetails: (details) {
+              // 1. Calcular índices da peça colocada (para o efeito Pop)
+              final placedIndices = <int>{};
+              for (int r = 0; r < details.data.rows; r++) {
+                for (int c = 0; c < details.data.columns; c++) {
+                  if (details.data.shape[r][c] == 1) {
+                    placedIndices.add((row + r) * Board.columns + (col + c));
+                  }
+                }
+              }
+
+              // 2. Verificar se esta colocação vai LIMPAR linhas/colunas
+              final completable = widget.board.getCompletableLines(details.data, row, col);
+              final clearIndices = <int>{};
+
+              for (int r in completable.rows) {
+                for (int c = 0; c < Board.columns; c++) {
+                  clearIndices.add(r * Board.columns + c);
+                }
+              }
+              for (int c in completable.cols) {
+                for (int r = 0; r < Board.rows; r++) {
+                  clearIndices.add(r * Board.columns + c);
+                }
+              }
+
               setState(() {
                 _hoverRow = null;
                 _hoverCol = null;
                 _hoverPiece = null;
               });
-              widget.onPiecePlaced(details.data, row, col);
+
+              _triggerPlacementPop(placedIndices);
+
+              if (clearIndices.isNotEmpty) {
+                // Ativar animação de explosão antes de esvaziar as linhas
+                triggerLineClearAnimation(clearIndices, () {
+                  widget.onPiecePlaced(details.data, row, col);
+                });
+              } else {
+                widget.onPiecePlaced(details.data, row, col);
+              }
             },
             builder: (context, candidateData, rejectedData) {
-              return _buildCell(
-                color: cellColor,
-                isHovered: isHovered,
-                previewColor: previewColor,
-                size: cellSize,
+              return AnimatedBuilder(
+                animation: Listenable.merge([_popAnimation, _clearAnimation]),
+                builder: (context, child) {
+                  double scale = 1.0;
+                  double opacity = 1.0;
+
+                  if (isPop) {
+                    scale = _popAnimation.value;
+                  }
+                  if (isClearing) {
+                    scale = _clearAnimation.value;
+                    opacity = _clearAnimation.value;
+                  }
+
+                  return Transform.scale(
+                    scale: scale,
+                    child: Opacity(
+                      opacity: opacity,
+                      child: _buildCell(
+                        color: cellColor,
+                        isPieceHoverSlot: isPieceHoverSlot,
+                        isLineCompletionHighlight: isLineCompletionHighlight,
+                        hoverPieceColor: hoverPieceColor ?? _hoverPiece?.color,
+                        isClearing: isClearing,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -115,12 +252,63 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
 
   Widget _buildCell({
     required Color? color,
-    required bool isHovered,
-    required Color? previewColor,
-    required double size,
+    required bool isPieceHoverSlot,
+    required bool isLineCompletionHighlight,
+    required Color? hoverPieceColor,
+    required bool isClearing,
   }) {
+    // 1. Célula a ser eliminada (Efeito de Explosão/Flash)
+    if (isClearing) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: const [
+            BoxShadow(color: Colors.white, blurRadius: 12, spreadRadius: 3),
+          ],
+        ),
+      );
+    }
+
+    // 2. Célula pertencente a uma LINHA/COLUNA QUE SERÁ COMPLETADA no Hover
+    if (isLineCompletionHighlight && hoverPieceColor != null) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          gradient: LinearGradient(
+            colors: [
+              hoverPieceColor.withValues(alpha: 0.95),
+              hoverPieceColor,
+              Color.lerp(hoverPieceColor, Colors.white, 0.4)!,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: hoverPieceColor.withValues(alpha: 0.85),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 3. Pré-visualização da Peça a Encaixar (Hover translúcido)
+    if (isPieceHoverSlot && hoverPieceColor != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: hoverPieceColor.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 1.5),
+        ),
+      );
+    }
+
+    // 4. Bloco Preenchido na Grelha (Visual 3D Block Blast)
     if (color != null) {
-      // Bloco preenchido estilo Block Blast (3D brilhante com gradiente)
       return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
@@ -148,18 +336,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
       );
     }
 
-    if (isHovered && previewColor != null) {
-      // Célula destacada na pré-visualização
-      return Container(
-        decoration: BoxDecoration(
-          color: previewColor,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.white, width: 2),
-        ),
-      );
-    }
-
-    // Célula vazia (ranhura escura 3D)
+    // 5. Célula Vazia (Ranhura escura 3D)
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF2E2452),
