@@ -17,7 +17,7 @@ enum PieceType {
   zShape,
   corner2x2,
   diagSlash,
-  diagBackslash
+  diagBackslash,
 }
 
 class Piece {
@@ -202,8 +202,9 @@ class Piece {
             [1, 0],
           ],
         ),
+        // Diagonal /
         Piece(
-          id: 'diagSlash',
+          id: 'diag_slash',
           type: PieceType.diagSlash,
           color: const Color(0xFF00E676),
           shape: [
@@ -212,6 +213,7 @@ class Piece {
             [1, 0, 0],
           ],
         ),
+        // Diagonal \
         Piece(
           id: 'diag_backslash',
           type: PieceType.diagBackslash,
