@@ -27,14 +27,18 @@ class _GameScreenState extends State<GameScreen> {
 
   Future<void> _loadHighScore() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      highScore = prefs.getInt('block_blast_high_score') ?? 0;
-    });
+    if (mounted) {
+      setState(() {
+        highScore = prefs.getInt('block_blast_high_score') ?? 0;
+      });
+    }
   }
 
   Future<void> _updateHighScoreIfNeeded() async {
     if (board.score > highScore) {
-      highScore = board.score;
+      setState(() {
+        highScore = board.score;
+      });
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('block_blast_high_score', highScore);
     }
@@ -64,6 +68,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _checkGameOver() {
+    if (isGameOver) return;
+
     if (!board.canPlaceAnyPiece(availablePieces)) {
       setState(() {
         isGameOver = true;
@@ -225,7 +231,7 @@ class _GameScreenState extends State<GameScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // High Score Pill
+                  // High Score
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
@@ -245,7 +251,7 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
 
-                  // Current Score Pill
+                  // Current Score
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
