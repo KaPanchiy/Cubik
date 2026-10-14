@@ -30,17 +30,19 @@ class IncidentEntry {
 
   factory IncidentEntry.fromJson(Map<String, dynamic> json) {
     return IncidentEntry(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      date: json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
-      category: json['category'] ?? 'Geral',
-      severity: json['severity'] ?? 'Médio',
-      description: json['description'] ?? '',
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      date: json['date'] != null
+          ? (DateTime.tryParse(json['date'].toString()) ?? DateTime.now())
+          : DateTime.now(),
+      category: json['category'] as String? ?? 'Geral',
+      severity: json['severity'] as String? ?? 'Médio',
+      description: json['description'] as String? ?? '',
     );
   }
 
   String encode() => jsonEncode(toJson());
 
   factory IncidentEntry.decode(String str) =>
-      IncidentEntry.fromJson(jsonDecode(str));
+      IncidentEntry.fromJson(jsonDecode(str) as Map<String, dynamic>);
 }
