@@ -48,11 +48,9 @@ class Board {
       return (rows: <int>[], cols: <int>[]);
     }
 
-    // Criar cópia temporária da grelha
-    List<List<Color?>> tempGrid = List.generate(
-      rows,
-      (r) => List.generate(columns, (c) => grid[r][c]),
-    );
+    // Criar cópia temporária e eficiente da grelha
+    List<List<Color?>> tempGrid =
+        grid.map((row) => List<Color?>.from(row)).toList();
 
     // Colocar a peça na grelha temporária
     for (int r = 0; r < piece.shape.length; r++) {
