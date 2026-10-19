@@ -2,14 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../hidden_dashboard.dart';
 import '../services/secret_code_service.dart';
+import '../services/boost_service.dart';
+import '../services/revive_service.dart';
 
 class RedeemCodeDialog extends StatefulWidget {
-  const RedeemCodeDialog({super.key});
+  const RedeemCodeDialog({
+    super.key,
+    this.onBoostActivated,
+    this.onReviveActivated,
+  });
 
-  static void show(BuildContext context) {
+  /// Callback chamado quando o boost BLOCK2026 é ativado com sucesso.
+  /// Recebe os usos restantes do dia.
+  final void Function(int remainingUses)? onBoostActivated;
+
+  /// Callback chamado quando o código REVIVE é acionado numa partida perdida.
+  final VoidCallback? onReviveActivated;
+
+  static void show(
+    BuildContext context, {
+    void Function(int)? onBoostActivated,
+    VoidCallback? onReviveActivated,
+  }) {
     showDialog(
       context: context,
-      builder: (context) => const RedeemCodeDialog(),
+      builder: (context) => RedeemCodeDialog(
+        onBoostActivated: onBoostActivated,
+        onReviveActivated: onReviveActivated,
+      ),
     );
   }
 
@@ -37,12 +57,44 @@ class _RedeemCodeDialogState extends State<RedeemCodeDialog> {
       _errorMessage = null;
     });
 
-    final isValidSecret = await SecretCodeService.validateCode(code);
+    // 1. Verificar se é o código de boost BLOCK2026
+    if (BoostService.isBoostCode(code)) {
+      final remaining = await BoostService.activateBoost();
+      if (!mounted) return;
 
+      if (remaining == -1) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Já usaste o boost 3 vezes hoje. Volta amanhã!';
+        });
+        return;
+      }
+
+      // Boost ativado com sucesso
+      Navigator.of(context).pop();
+      widget.onBoostActivated?.call(remaining);
+      return;
+    }
+
+    // 2. Verificar se é o código de renascimento REVIVE
+    if (ReviveService.isReviveCode(code)) {
+      if (widget.onReviveActivated != null) {
+        Navigator.of(context).pop();
+        widget.onReviveActivated!();
+      } else {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'O código REVIVE só pode ser usado quando perderes uma partida!';
+        });
+      }
+      return;
+    }
+
+    // 3. Verificar se é o código secreto do painel oculto
+    final isValidSecret = await SecretCodeService.validateCode(code);
     if (!mounted) return;
 
     if (isValidSecret) {
-      // Fecha o diálogo e abre o Painel Oculto
       Navigator.of(context).pop();
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -53,7 +105,6 @@ class _RedeemCodeDialogState extends State<RedeemCodeDialog> {
         ),
       );
     } else {
-      // Exibe mensagem idêntica a uma mensagem normal de erro num jogo
       setState(() {
         _isLoading = false;
         _errorMessage = 'Código inválido ou expirado. Verifica e tenta novamente.';

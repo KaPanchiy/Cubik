@@ -21,6 +21,20 @@ class Board {
     score = 0;
   }
 
+  /// Limpa linhas e colunas centrais para abrir espaço e permitir ao jogador continuar a partida ao reviver
+  void clearForRevive() {
+    // Limpar as duas linhas centrais (linhas 3 e 4)
+    for (int c = 0; c < columns; c++) {
+      grid[3][c] = null;
+      grid[4][c] = null;
+    }
+    // Limpar as duas colunas centrais (colunas 3 e 4)
+    for (int r = 0; r < rows; r++) {
+      grid[r][3] = null;
+      grid[r][4] = null;
+    }
+  }
+
   // Verifica se a peça pode ser colocada numa determinada posição (row, col)
   bool canPlacePiece(Piece piece, int startRow, int startCol) {
     if (startRow < 0 || startCol < 0) return false;

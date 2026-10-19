@@ -5,11 +5,15 @@ import '../modelos/piece.dart';
 class GameBoardWidget extends StatefulWidget {
   final Board board;
   final Function(Piece piece, int row, int col) onPiecePlaced;
+  final int boostSecsLeft;
+  final int comboStreak;
 
   const GameBoardWidget({
     super.key,
     required this.board,
     required this.onPiecePlaced,
+    this.boostSecsLeft = 0,
+    this.comboStreak = 0,
   });
 
   @override
@@ -81,8 +85,6 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
 
   @override
   Widget build(BuildContext context) {
-    const double boardSize = 320.0;
-
     // Calcular se o hover atual vai completar alguma linha ou coluna inteira
     List<int> completableRows = [];
     List<int> completableCols = [];
@@ -97,25 +99,150 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
       completableCols = res.cols;
     }
 
+    const double gridWidth = 308.0;
+    const double gridHeight = 308.0;
+    final bool isBoostActive = widget.boostSecsLeft > 0;
+
+    String boostTimeFormatted = '';
+    if (isBoostActive) {
+      final m = (widget.boostSecsLeft ~/ 60).toString().padLeft(2, '0');
+      final s = (widget.boostSecsLeft % 60).toString().padLeft(2, '0');
+      boostTimeFormatted = '$m:$s';
+    }
+
     return Container(
-      width: boardSize,
-      height: boardSize,
+      width: 326.0,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFF231B40), // Dark Block Blast purple
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
+          if (isBoostActive)
+            BoxShadow(
+              color: Colors.orange.withValues(alpha: 0.35),
+              blurRadius: 18,
+              spreadRadius: 2,
+            )
+          else
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
         ],
-        border: Border.all(color: const Color(0xFF3B2E68), width: 2),
+        border: Border.all(
+          color: isBoostActive ? Colors.orangeAccent : const Color(0xFF3B2E68),
+          width: isBoostActive ? 2.5 : 2,
+        ),
       ),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: Board.rows * Board.columns,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Barra no topo da Tábua (Tempo do Boost e Contador de Combos) ──
+          Padding(
+            padding: const EdgeInsets.only(left: 4, right: 4, bottom: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Indicador de Boost (Tempo restante na tábua)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    gradient: isBoostActive
+                        ? const LinearGradient(
+                            colors: [Color(0xFFFF9100), Color(0xFFFF3D00)],
+                          )
+                        : null,
+                    color: isBoostActive ? null : const Color(0xFF1B1433),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isBoostActive ? Colors.white70 : const Color(0xFF3B2E68),
+                      width: 1,
+                    ),
+                    boxShadow: isBoostActive
+                        ? [
+                            BoxShadow(
+                              color: Colors.orange.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.bolt,
+                        color: isBoostActive ? Colors.white : Colors.grey.shade500,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isBoostActive ? '2x: $boostTimeFormatted' : '1x Normal',
+                        style: TextStyle(
+                          color: isBoostActive ? Colors.white : Colors.grey.shade400,
+                          fontWeight: isBoostActive ? FontWeight.w900 : FontWeight.w600,
+                          fontSize: 12,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Indicador de Combo (Meta de 5 seguidos para ganhar 2x grátis)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: widget.comboStreak > 0
+                        ? const Color(0xFF3B2E68)
+                        : const Color(0xFF1B1433),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: widget.comboStreak >= 4
+                          ? Colors.orangeAccent
+                          : (widget.comboStreak > 0
+                              ? Colors.purpleAccent.withValues(alpha: 0.6)
+                              : const Color(0xFF3B2E68)),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.local_fire_department,
+                        color: widget.comboStreak > 0
+                            ? Colors.orangeAccent
+                            : Colors.grey.shade600,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Combo: ${widget.comboStreak}/5',
+                        style: TextStyle(
+                          color: widget.comboStreak > 0
+                              ? Colors.orangeAccent
+                              : Colors.grey.shade400,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Grelha 8x8 do Tabuleiro
+          SizedBox(
+            width: gridWidth,
+            height: gridHeight,
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: Board.rows * Board.columns,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: Board.columns,
           crossAxisSpacing: 4,
@@ -247,7 +374,10 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
           );
         },
       ),
-    );
+    ),
+  ],
+),
+);
   }
 
   Widget _buildCell({

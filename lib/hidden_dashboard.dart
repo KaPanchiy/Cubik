@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'modelos/incident_model.dart';
-import 'services/diary_service.dart';
+import 'services/diary_screen.dart';
 import 'services/secret_code_service.dart';
 
 void main() {
@@ -27,7 +26,7 @@ class DashboardModel extends ChangeNotifier {
     {'icon': Icons.list_alt, 'title': 'Tipos de Violência', 'screen': const TypesScreen()},
     {'icon': Icons.info_outline, 'title': 'Aconselhamento e Apoio', 'screen': const SupportScreen()},
     {'icon': Icons.menu_book, 'title': 'Guia de segurança digital', 'screen': const DigitalSafetyScreen()},
-    {'icon': Icons.grid_view, 'title': 'Recursos Úteis', 'screen': const ResourcesScreen()},
+    {'icon': Icons.grid_view, 'title': 'Linhas de Apoio', 'screen': const ResourcesScreen()},
     {'icon': Icons.lock_outline, 'title': 'Alterar Código Secreto', 'screen': const ChangePinScreen()},
   ];
 }
@@ -41,11 +40,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Painel de Apoio',
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFFFFAFA),
+        scaffoldBackgroundColor: const Color(0xFF18243A),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFA0522D),
-          foregroundColor: Colors.white,
-          elevation: 1,
+          backgroundColor: Color(0xFF18243A),
+          foregroundColor: Color(0xFFF1DAC4),
+          elevation: 0,
+        ),
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(color: Color(0xFFF1DAC4)),
+          titleMedium: TextStyle(color: Color(0xFFF1DAC4)),
         ),
       ),
       home: const HiddenDashboard(),
@@ -68,24 +71,23 @@ class HiddenDashboard extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Não está sozinho(a)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: const Text('Não está sozinho(a)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4))),
       ),
       body: bottomScreens[model.currentIndex],
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFFC86B68),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.exit_to_app),
         label: const Text('Sair Rápido', style: TextStyle(fontWeight: FontWeight.bold)),
-        onPressed: () {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        },
+        onPressed: () => Navigator.of(context).pop(),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: model.currentIndex,
+        backgroundColor: const Color(0xFF18243A),
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF1565C0),
-        unselectedItemColor: Colors.grey[600],
+        selectedItemColor: const Color(0xFF48A9A6),
+        unselectedItemColor: const Color(0xFFF1DAC4).withValues(alpha: 0.6),
         onTap: (index) => model.setIndex(index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -108,8 +110,8 @@ class HomeGridViewContent extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12.0,
-        mainAxisSpacing: 12.0,
+        crossAxisSpacing: 14.0,
+        mainAxisSpacing: 14.0,
       ),
       itemCount: model.menuItems.length,
       itemBuilder: (context, index) {
@@ -127,6 +129,7 @@ class HomeGridViewContent extends StatelessWidget {
   }
 }
 
+// Cartão com Design Aprimorado (Gradiente e Sombra Suave)
 class MenuCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -136,26 +139,57 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 42, color: const Color(0xFF1565C0)),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.0),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF23324D), Color(0xFF1C2A42)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: const Color(0xFF48A9A6).withValues(alpha: 0.3),
+          width: 1.2,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF48A9A6).withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 36, color: const Color(0xFF48A9A6)),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Color(0xFFF1DAC4),
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -180,60 +214,42 @@ class TypesScreen extends StatelessWidget {
       'title': 'Violência Psicológica e Controlo Coercivo',
       'icon': Icons.psychology,
       'isRichDescription': true,
-      'intro': 'A violência psicológica consiste em agressões sem contacto físico — como humilhações, desvalorizações e menosprezos verbais — que causam danos emocionais profundos. Embora invisível, afeta a autoestima, a razão e a capacidade de reação da vítima. Costuma começar de forma subtil em ambientes familiares, escolares, sociais ou profissionais, evoluindo até ao controlo total do agressor.',
+      'intro': 'A violência psicológica consiste em agressões sem contacto físico — como humilhações, desvalorizações e menosprezos verbais — que causam danos emocionais profundos. Embora invisível, afeta a autoestima, a razão e a capacidade de reação da vítima.',
       'bulletPoints': [
-        {'title': 'Humilhações:', 'text': ' Piadas e críticas que rebaixam a vítima, mesmo quando camufladas em tom de brincadeira, ou ações degradantes direcionadas perante entes queridos ou desconhecidos.'},
+        {'title': 'Humilhações:', 'text': ' Piadas e críticas que rebaixam a vítima, mesmo quando camufladas em tom de brincadeira.'},
         {'title': 'Isolamento Social:', 'text': ' Impedir ou encorajar a vítima de se conectar com amigos, familiares ou colegas.'},
-        {'title': 'Controlo e Vigilância:', 'text': ' Monitorizar horários, vestuário, finanças ou interações sociais. Se o controlo for excessivo, acaba por se transformar numa forma clara de violência psicológica.'},
-        {'title': 'Culpabilização:', 'text': ' Fazer a vítima sentir-se sempre errada ou responsável pelas ações do agressor.'},
-        {'title': 'Gaslighting (Manipulação da Realidade):', 'text': ' Manipulação exercida para distorcer a perceção da realidade da vítima.'},
-        {'title': 'Ameaça:', 'text': ' Gera medo e restringe as ações da vítima. Alguns casos graves são punidos por lei.'},
-        {'title': 'Chantagem:', 'text': ' Forma de controlo que explora o sentimento de medo ou a culpa.'},
-        {'title': 'Monopolizar a Tomada de Decisões:', 'text': ' Impedir que o outro participe em decisões essenciais (controlo do dinheiro, gestão do tempo, escolha profissional, etc.).'},
-        {'title': 'Insultos e Gritos:', 'text': ' As discussões pontuais são normais nos relacionamentos, mas os gritos constantes e os insultos repetidos constituem violência psicológica.'},
-        {'title': 'Controlo da Imagem:', 'text': ' Restrições impostas à aparência ou à imagem através de humilhações, coações ou ameaças.'},
-        {'title': 'Provocações:', 'text': ' Atitudes que ultrapassam os limites da confiança e visam prejudicar e humilhar.'},
-        {'title': 'Moralização:', 'text': ' Associada à chantagem e à humilhação, traduz-se na demonstração constante de superioridade moral.'},
-        {'title': 'Críticas Destrutivas:', 'text': ' Críticas reiteradas e constantes que não pretendem ajudar, mas sim destruir a autoconfiança.'},
-        {'title': 'Invalidação Emocional:', 'text': ' Desqualificar de forma sistemática os sentimentos de alguém, provocando incapacidade de expressão e incredulidade no próprio julgamento.'},
-        {'title': 'Indiferença:', 'text': ' Permanecer deliberadamente indiferente ao outro em qualquer contexto relacional.'},
-        {'title': 'Assédio Moral:', 'text': ' Forma de violência psicológica deliberada, cujo intuito é destruir sistematicamente a autoestima da vítima.'}
       ],
-      'help': 'Registe episódios num diário seguro (pode usar a aba Diário desta app). Fale com amigos de confiança ou familiares e contacte a linha 800 202 148 para aconselhamento psicológico.'
+      'help': 'Registe episódios num diário seguro. Fale com pessoas de confiança e contacte a linha 800 202 148.'
     },
     {
       'title': 'Violência Financeira e Económica',
       'icon': Icons.account_balance_wallet,
       'isRichDescription': true,
-      'intro': 'A violência económica consiste em qualquer comportamento que busca dominar ou subjugar a vítima, manipulando o seu acesso a recursos financeiros, bens, informações ou ao poder de decisão sobre os mesmos. Trata-se do uso do dinheiro como ferramenta de controlo e imposição de limites.',
+      'intro': 'A violência económica consiste em qualquer comportamento que busca dominar ou subjugar a vítima, manipulando o seu acesso a recursos financeiros.',
       'bulletPoints': [
         {'title': 'Proibição de trabalhar:', 'text': ' Impedir que a vítima procure emprego, estude ou mantenha atividade profissional.'},
-        {'title': 'Controlo rigoroso de gastos:', 'text': ' Exigir justificações detalhadas para cada despesa, fixar mesadas restritas ou reter cartões e contas bancárias.'},
-        {'title': 'Criação de dívidas:', 'text': ' Contrair empréstimos ou obrigações financeiras em nome da vítima sem o seu consentimento livre.'}
       ],
-      'help': 'Tente guardar documentos importantes e extratos bancários num local seguro ou digital. Procure apoio jurídico gratuito através da APAV (116 006) ou Segurança Social.'
+      'help': 'Tente guardar documentos importantes e extratos num local seguro ou digital. Procure apoio jurídico gratuito através da APAV (116 006).'
     },
     {
       'title': 'Violência Sexual',
       'icon': Icons.block,
       'isRichDescription': true,
-      'intro': 'A violência sexual manifesta-se através de diferentes condutas graves, que se distinguem pelos atos praticados e pela relação de poder entre os envolvidos:',
+      'intro': 'A violência sexual manifesta-se através de diferentes condutas graves que violam a liberdade e autodeterminação sexual.',
       'bulletPoints': [
-        {'title': 'Estupro/Coação Sexual:', 'text': ' Ocorre ao constranger a vítima a praticar atos sexuais não consentidos mediante violência ou grave ameaça.'},
-        {'title': 'Assédio Sexual:', 'text': ' Consiste em constranger alguém para obter vantagem ou favorecimento sexual, tirando proveito de uma posição de superioridade hierárquica.'}
+        {'title': 'Coação Sexual:', 'text': 'Ocorre ao constranger a vítima a praticar atos sexuais não consentidos mediante violência ou grave ameaça.'},
       ],
-      'help': 'Não tome banho nem mude de roupa se o ato foi muito recente, para preservação de provas. Dirija-se a uma urgência hospitalar ou ligue para a Linha SOS Mulher (808 200 175).'
+      'help': 'Não tome banho nem mude de roupa se o ato foi muito recente. Dirija-se a uma urgência hospitalar.'
     },
     {
       'title': 'Stalking (Perseguição Persistente)',
       'icon': Icons.security,
       'isRichDescription': true,
-      'intro': 'O stalking caracteriza-se por um padrão de comportamentos repetidos e indesejados dirigidos a uma pessoa, comumente por alguém do círculo de relações.',
+      'intro': 'O stalking caracteriza-se por um padrão de comportamentos repetidos e indesejados dirigidos a uma pessoa.',
       'bulletPoints': [
-        {'title': 'Presencial:', 'text': ' Vigilância, tentativas de aproximação, presenças indesejadas e envio contínuo de mensagens ou presentes.'},
-        {'title': 'Digital (Cyberstalking):', 'text': ' Publicação de fotos, comentários invasivos, monitorização nas redes sociais ou contactos insistentes por meios eletrónicos.'}
+        {'title': 'Presencial e Digital:', 'text': 'Vigilância constante, rondas à residência e monitorização obsessiva nas redes sociais.'},
       ],
-      'help': 'Guarde todas as provas (capturas de ecrã de mensagens, registos de chamadas). Evite responder aos contactos do perseguidor e reporte imediatamente às autoridades.'
+      'help': 'Guarde todas as provas (capturas de ecrã) e reporte imediatamente às autoridades.'
     },
   ];
 
@@ -247,11 +263,12 @@ class TypesScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = _violenceTypes[index];
           return Card(
-            elevation: 3,
+            elevation: 2,
+            color: const Color(0xFF23324D),
             margin: const EdgeInsets.only(bottom: 16.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
-              side: BorderSide(color: Colors.grey.shade300, width: 1),
+              side: BorderSide(color: const Color(0xFF48A9A6).withValues(alpha: 0.3), width: 1),
             ),
             child: InkWell(
               borderRadius: BorderRadius.circular(16.0),
@@ -264,7 +281,9 @@ class TypesScreen extends StatelessWidget {
                       description: item['description'] ?? '',
                       isRichDescription: item['isRichDescription'] ?? false,
                       intro: item['intro'] ?? '',
-                      bulletPoints: item['bulletPoints'] ?? [],
+                      bulletPoints: List<Map<String, String>>.from(
+                        (item['bulletPoints'] ?? []).map((e) => Map<String, String>.from(e))
+                      ),
                       help: item['help'],
                       icon: item['icon'],
                     ),
@@ -278,33 +297,23 @@ class TypesScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1565C0).withValues(alpha: 0.1),
+                        color: const Color(0xFF48A9A6).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(item['icon'], size: 32, color: const Color(0xFF1565C0)),
+                      child: Icon(item['icon'], size: 32, color: const Color(0xFF48A9A6)),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            item['title'],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
+                          Text(item['title'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4))),
                           const SizedBox(height: 4),
-                          Text(
-                            'Toque para ver detalhes e como pedir ajuda',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                          ),
+                          const Text('Toque para ver detalhes e como pedir ajuda', style: TextStyle(fontSize: 12, color: Color(0xFFF1DAC4))),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF48A9A6)),
                   ],
                 ),
               ),
@@ -345,51 +354,34 @@ class TypeDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Icon(icon, size: 64, color: const Color(0xFF1565C0)),
-            ),
+            Center(child: Icon(icon, size: 64, color: const Color(0xFF48A9A6))),
             const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
-              textAlign: TextAlign.center,
-            ),
+            Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)), textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            const Text(
-              'O que é?',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFA0522D)),
-            ),
+            const Text('O que é?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFF23324D),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: const Color(0xFF48A9A6).withValues(alpha: 0.3)),
               ),
               child: isRichDescription
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (intro.isNotEmpty) ...[
-                          Text(
-                            intro,
-                            style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.black87),
-                          ),
-                        ],
+                        if (intro.isNotEmpty) Text(intro, style: const TextStyle(fontSize: 15, height: 1.5, color: Color(0xFFF1DAC4))),
                         if (bulletPoints.isNotEmpty) ...[
                           if (intro.isNotEmpty) const SizedBox(height: 12),
                           ...bulletPoints.map((bp) => Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: RichText(
                                   text: TextSpan(
-                                    style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.black87),
+                                    style: const TextStyle(fontSize: 15, height: 1.5, color: Color(0xFFF1DAC4)),
                                     children: [
-                                      const TextSpan(text: '• '),
-                                      TextSpan(
-                                        text: bp['title'],
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
-                                      ),
+                                      const TextSpan(text: '• ', style: TextStyle(color: Color(0xFF48A9A6))),
+                                      TextSpan(text: bp['title'], style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
                                       TextSpan(text: bp['text']),
                                     ],
                                   ),
@@ -398,28 +390,19 @@ class TypeDetailScreen extends StatelessWidget {
                         ],
                       ],
                     )
-                  : Text(
-                      description,
-                      style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.black87),
-                    ),
+                  : Text(description, style: const TextStyle(fontSize: 15, height: 1.5, color: Color(0xFFF1DAC4))),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Como pedir ajuda?',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1565C0)),
-            ),
+            const Text('Como pedir ajuda?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1565C0).withValues(alpha: 0.05),
+                color: const Color(0xFF23324D),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.3)),
+                border: Border.all(color: const Color(0xFF48A9A6)),
               ),
-              child: Text(
-                help,
-                style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.black87),
-              ),
+              child: Text(help, style: const TextStyle(fontSize: 15, height: 1.5, color: Color(0xFFF1DAC4))),
             ),
           ],
         ),
@@ -429,7 +412,7 @@ class TypeDetailScreen extends StatelessWidget {
 }
 
 // =====================================================================
-// 2. QUESTIONÁRIO INTERATIVO ("Será violência doméstica?")
+// 2. QUESTIONÁRIO INTERATIVO (Dual: Próprio ou Amigo)
 // =====================================================================
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -477,8 +460,8 @@ class _QuizScreenState extends State<QuizScreen> {
   void _answerQuestion(bool answer) {
     setState(() {
       _answers[_currentQuestionIndex] = answer;
-      List<String> currentQuestions = _isForMe! ? _questionsForMe : _questionsForFriend;
-      if (_currentQuestionIndex < currentQuestions.length - 1) {
+      List<String> activeQuestions = _isForMe! ? _questionsForMe : _questionsForFriend;
+      if (_currentQuestionIndex < activeQuestions.length - 1) {
         _currentQuestionIndex++;
       }
     });
@@ -515,24 +498,24 @@ class _QuizScreenState extends State<QuizScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.help_outline, size: 64, color: Color(0xFF1565C0)),
+              const Icon(Icons.help_outline, size: 64, color: Color(0xFF48A9A6)),
               const SizedBox(height: 24),
               const Text(
                 'Para quem está a responder a este questionário?',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
               ),
               const SizedBox(height: 12),
               const Text(
-                'Escolha uma das opções abaixo para personalizarmos as perguntas e as recomendações de apoio.',
+                'Escolha uma das opções abaixo para personalizarmos as perguntas.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(fontSize: 14, color: Color(0xFFF1DAC4)),
               ),
               const SizedBox(height: 36),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1565C0),
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF48A9A6),
+                  foregroundColor: const Color(0xFF18243A),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -545,10 +528,10 @@ class _QuizScreenState extends State<QuizScreen> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  side: const BorderSide(color: Color(0xFFA0522D), width: 2),
+                  side: const BorderSide(color: Color(0xFF48A9A6), width: 2),
                 ),
-                icon: const Icon(Icons.people, color: Color(0xFFA0522D)),
-                label: const Text('É com um(a) amigo(a) / conhecido(a)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFA0522D))),
+                icon: const Icon(Icons.people, color: Color(0xFF48A9A6)),
+                label: const Text('É com um(a) amigo(a) / conhecido(a)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
                 onPressed: () => _selectTarget(false),
               ),
             ],
@@ -561,9 +544,7 @@ class _QuizScreenState extends State<QuizScreen> {
     final bool isCompleted = _answers.every((element) => element != null);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isForMe! ? 'Avaliação Pessoal' : 'Apoio a Amigo(a)'),
-      ),
+      appBar: AppBar(title: Text(_isForMe! ? 'Avaliação Pessoal' : 'Apoio a Amigo(a)')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: !isCompleted
@@ -572,8 +553,8 @@ class _QuizScreenState extends State<QuizScreen> {
                 children: [
                   LinearProgressIndicator(
                     value: (_currentQuestionIndex + 1) / activeQuestions.length,
-                    backgroundColor: Colors.grey.shade300,
-                    color: const Color(0xFF1565C0),
+                    backgroundColor: const Color(0xFF23324D),
+                    color: const Color(0xFF48A9A6),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -581,13 +562,13 @@ class _QuizScreenState extends State<QuizScreen> {
                     children: [
                       Text(
                         'Pergunta ${_currentQuestionIndex + 1} de ${activeQuestions.length}',
-                        style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 14, color: Color(0xFFF1DAC4), fontWeight: FontWeight.bold),
                       ),
                       Chip(
-                        backgroundColor: const Color(0xFF1565C0).withValues(alpha: 0.1),
+                        backgroundColor: const Color(0xFF48A9A6).withValues(alpha: 0.2),
                         label: Text(
                           _isForMe! ? 'Contexto Próprio' : 'Contexto de Amizade',
-                          style: const TextStyle(fontSize: 11, color: Color(0xFF1565C0)),
+                          style: const TextStyle(fontSize: 11, color: Color(0xFF48A9A6)),
                         ),
                       ),
                     ],
@@ -595,12 +576,12 @@ class _QuizScreenState extends State<QuizScreen> {
                   const SizedBox(height: 12),
                   Text(
                     activeQuestions[_currentQuestionIndex],
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFFF1DAC4)),
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade700,
+                      backgroundColor: const Color(0xFFC86B68),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -613,15 +594,15 @@ class _QuizScreenState extends State<QuizScreen> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      side: const BorderSide(color: Color(0xFF1565C0)),
+                      side: const BorderSide(color: Color(0xFF48A9A6)),
                     ),
                     onPressed: () => _answerQuestion(false),
-                    child: const Text('NÃO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
+                    child: const Text('NÃO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
                     onPressed: _previousQuestion,
-                    child: const Text('Voltar / Mudar opção anterior'),
+                    child: const Text('Voltar / Mudar opção anterior', style: TextStyle(color: Color(0xFF48A9A6))),
                   ),
                 ],
               )
@@ -641,8 +622,7 @@ class QuizResultView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int simCount = answers.where((element) => element == true).length;
-    bool hasHighRiskTriggers = (answers.length > 3 && answers[3] == true) ||
-        (answers.length > 6 && answers[6] == true);
+    bool hasHighRiskTriggers = (answers.length > 3 && answers[3] == true) || (answers.length > 6 && answers[6] == true);
 
     String title;
     String description;
@@ -652,30 +632,25 @@ class QuizResultView extends StatelessWidget {
     if (isForMe) {
       if (simCount >= 5 || hasHighRiskTriggers) {
         title = 'Indicadores Elevados (Risco Alto)';
-        description = 'A sua situação apresenta indicadores claros de risco elevado para a sua integridade e segurança. Procure ajuda especializada de imediato ou contacte as autoridades.';
-        headerColor = Colors.red.shade700;
+        description = 'A sua situação apresenta indicadores claros de risco elevado. Procure ajuda especializada de imediato.';
+        headerColor = const Color(0xFFC86B68);
         headerIcon = Icons.warning_amber_rounded;
-      } else if (simCount >= 2) {
-        title = 'Indicadores Moderados';
-        description = 'Existem sinais evidentes de controlo e desgaste emocional na relação. Considere conversar de forma confidencial com uma linha de apoio ou profissional.';
-        headerColor = Colors.orange.shade800;
-        headerIcon = Icons.info_outline;
       } else {
-        title = 'Indicadores Baixos';
-        description = 'Foram assinalados poucos sinais de alerta, mas mantenha-se atento(a) a qualquer mudança de comportamento ou restrição da sua liberdade.';
-        headerColor = Colors.green.shade700;
-        headerIcon = Icons.check_circle_outline;
+        title = 'Indicadores Moderados / Baixos';
+        description = 'Existem sinais a merecer atenção. Considere conversar com uma linha de apoio de forma confidencial.';
+        headerColor = const Color(0xFF48A9A6);
+        headerIcon = Icons.info_outline;
       }
     } else {
       if (simCount >= 5 || hasHighRiskTriggers) {
-        title = 'Alerta Máximo de Apoio';
-        description = 'O seu amigo(a) pode estar numa situação de elevado perigo. Mostre disponibilidade para ouvir sem julgar e encoraje o contacto com entidades especializadas.';
-        headerColor = Colors.red.shade700;
+        title = 'Alerta Máximo de Apoio a Amigo(a)';
+        description = 'O seu amigo(a) pode estar numa situação de elevado perigo. Mostre disponibilidade sem julgar e encoraje o contacto com entidades especializadas.';
+        headerColor = const Color(0xFFC86B68);
         headerIcon = Icons.warning_amber_rounded;
       } else {
         title = 'Atenção Necessária';
-        description = 'Existem sinais de alerta na relação do seu amigo(a). Mantenha o contacto próximo e mostre que está lá para ajudar.';
-        headerColor = Colors.orange.shade800;
+        description = 'Existem sinais de alerta na relação do seu amigo(a). Mantenha o contacto próximo e mostre apoio.';
+        headerColor = const Color(0xFF48A9A6);
         headerIcon = Icons.info_outline;
       }
     }
@@ -685,7 +660,7 @@ class QuizResultView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: headerColor.withValues(alpha: 0.1),
+            color: const Color(0xFF23324D),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: headerColor, width: 1.5),
           ),
@@ -693,42 +668,33 @@ class QuizResultView extends StatelessWidget {
             children: [
               Icon(headerIcon, size: 48, color: headerColor),
               const SizedBox(height: 12),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: headerColor),
-              ),
+              Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: headerColor)),
               const SizedBox(height: 8),
-              Text(
-                description,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 15, height: 1.4, color: Colors.black87),
-              ),
+              Text(description, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15, height: 1.4, color: Color(0xFFF1DAC4))),
             ],
           ),
         ),
         const SizedBox(height: 24),
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1565C0),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF48A9A6),
+            foregroundColor: const Color(0xFF18243A),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           icon: const Icon(Icons.phone),
           label: const Text('Contactar Linha de Apoio (800 202 148)', style: TextStyle(fontWeight: FontWeight.bold)),
-          onPressed: () {
-            debugPrint('Ligar para linha de apoio');
-          },
+          onPressed: () {},
         ),
         const SizedBox(height: 12),
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            side: const BorderSide(color: Color(0xFF48A9A6)),
           ),
           onPressed: onRestart,
-          child: const Text('Refazer Questionário'),
+          child: const Text('Refazer Questionário', style: TextStyle(color: Color(0xFF48A9A6))),
         ),
       ],
     );
@@ -736,88 +702,186 @@ class QuizResultView extends StatelessWidget {
 }
 
 // =====================================================================
-// 3. MÓDULO DE ACONSELHAMENTO E APOIO (Estilo Bright Sky)
+// 3. MÓDULO DE ACONSELHAMENTO E APOIO (Completo com as 7 secções)
 // =====================================================================
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> supportSections = [
+      {
+        'title': 'O que fazer antes de abandonar a relação?',
+        'icon': Icons.description_outlined,
+        'screen': const GenericDetailSubScreen(
+          title: 'O que fazer antes de abandonar a relação?',
+          intro: 'Planear a saída com antecedência e segurança é um passo essencial para proteger a sua integridade física e emocional.',
+          subItems: [
+            {'title': 'Plano de Segurança:', 'text': 'Identifique locais seguros para onde se dirigir em caso de crise e memorize contactos de emergência.'},
+            {'title': 'Documentação e Dinheiro:', 'text': 'Reúna cópias de documentos de identificação essenciais e guarde algum valor monetário num local seguro.'},
+          ],
+        ),
+      },
+      {
+        'title': 'O que preciso levar comigo?',
+        'icon': Icons.work_outline,
+        'screen': const GenericDetailSubScreen(
+          title: 'O que preciso levar comigo?',
+          intro: 'Em caso de saída urgente, priorize os bens absolutamente indispensáveis para si e para os seus dependentes.',
+          subItems: [
+            {'title': 'Itens Essenciais:', 'text': 'Documentos de identidade, cartões bancários, chaves, telemóvel e medicação crónica.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Quais os riscos e como posso manter-me seguro(a)?',
+        'icon': Icons.warning_amber_rounded,
+        'screen': const GenericDetailSubScreen(
+          title: 'Quais os riscos e como posso manter-me seguro(a)?',
+          intro: 'O momento da separação ou decisão de rutura pode representar um período de maior vulnerabilidade e risco.',
+          subItems: [
+            {'title': 'Atenção e Proteção:', 'text': 'Mantenha contactos regulares com a sua rede de apoio e acione as autoridades perante ameaças.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Crianças e contacto contínuo',
+        'icon': Icons.family_restroom,
+        'screen': const GenericDetailSubScreen(
+          title: 'Crianças e contacto contínuo',
+          intro: 'A salvaguarda e o bem-estar dos menores são prioridades absolutas em contextos familiares difíceis.',
+          subItems: [
+            {'title': 'Proteção de Menores:', 'text': 'As crianças expostas à violência doméstica são também consideradas vítimas diretas perante a lei.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Animais de Estimação',
+        'icon': Icons.pets,
+        'screen': const GenericDetailSubScreen(
+          title: 'Animais de Estimação',
+          intro: 'A preocupação com o bem-estar dos animais de estimação é legítima e existem redes de apoio especializadas.',
+          subItems: [
+            {'title': 'Acolhimento Temporário:', 'text': 'Existem associações preparadas para colaborar no acolhimento de animais de vítimas em crise.'},
+          ],
+        ),
+      },
+      {
+        'title': 'O que posso fazer para me proteger quando sair de casa?',
+        'icon': Icons.security,
+        'screen': const GenericDetailSubScreen(
+          title: 'O que posso fazer para me proteger quando sair de casa?',
+          intro: 'Adote medidas preventivas para garantir a sua privacidade e segurança diária.',
+          subItems: [
+            {'title': 'Segurança Digital:', 'text': 'Apague o histórico relevante, altere palavras-passe e desative a geolocalização.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Não está sozinho(a).',
+        'icon': Icons.people_outline,
+        'screen': const GenericDetailSubScreen(
+          title: 'Não está sozinho(a).',
+          intro: 'Existem profissionais qualificados prontos a ouvi-lo(a) sem qualquer tipo de julgamento.',
+          subItems: [
+            {'title': 'Confidencialidade:', 'text': 'Todos os serviços de aconselhamento e linhas de apoio funcionam de forma totalmente confidencial e gratuita.'},
+          ],
+        ),
+      },
+    ];
+
     return Scaffold(
       appBar: AppBar(title: const Text('Aconselhamento e Apoio')),
-      body: ListView(
+      body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+        itemCount: supportSections.length,
+        itemBuilder: (context, index) {
+          final section = supportSections[index];
+          return Card(
+            elevation: 2,
+            color: const Color(0xFF23324D),
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.shade200),
+              side: BorderSide(color: const Color(0xFF48A9A6).withValues(alpha: 0.3)),
             ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Orientação Segura',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1565C0)),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => section['screen']),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+                child: Row(
+                  children: [
+                    Icon(section['icon'], color: const Color(0xFF48A9A6), size: 24),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        section['title'],
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF48A9A6)),
+                  ],
                 ),
-                SizedBox(height: 8),
-                Text(
-                  'Se suspeita que está a viver uma situação abusiva ou conhece alguém nessa situação, lembre-se de que não está sozinho(a). O apoio é confidencial e gratuito.',
-                  style: TextStyle(fontSize: 14, height: 1.4, color: Colors.black87),
-                ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'O que deve fazer?',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFA0522D)),
-          ),
-          const SizedBox(height: 8),
-          _buildSupportCard(
-            '1. Plano de Segurança',
-            'Identifique um local seguro para onde ir em caso de emergência e guarde cópias digitais de documentos importantes num local inacessível ao agressor.',
-            Icons.shield_outlined,
-          ),
-          _buildSupportCard(
-            '2. Fale com Alguém de Confiança',
-            'Partilhe o que está a sentir com um familiar ou amigo próximo. Quebrar o isolamento é um passo fundamental.',
-            Icons.people_outline,
-          ),
-          _buildSupportCard(
-            '3. Contacte Linhas Especializadas',
-            'Ligue grátis para a Linha de Apoio à Vítima (800 202 148) ou para o 112 em caso de perigo imediato.',
-            Icons.phone_outlined,
-          ),
-        ],
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildSupportCard(String title, String description, IconData icon) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
+class GenericDetailSubScreen extends StatelessWidget {
+  const GenericDetailSubScreen({
+    super.key,
+    required this.title,
+    required this.intro,
+    required this.subItems,
+  });
+
+  final String title;
+  final String intro;
+  final List<Map<String, String>> subItems;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: const Color(0xFF1565C0), size: 28),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(description, style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.4)),
-                ],
-              ),
-            ),
+            Text(intro, style: const TextStyle(fontSize: 16, height: 1.5, color: Color(0xFFF1DAC4))),
+            const SizedBox(height: 24),
+            const Text('Saber Mais', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
+            const SizedBox(height: 12),
+            ...subItems.map((item) => Card(
+                  elevation: 2,
+                  color: const Color(0xFF23324D),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: const Color(0xFF48A9A6).withValues(alpha: 0.3)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item['title']!, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
+                        const SizedBox(height: 6),
+                        Text(item['text']!, style: const TextStyle(fontSize: 14, height: 1.4, color: Color(0xFFF1DAC4))),
+                      ],
+                    ),
+                  ),
+                )),
           ],
         ),
       ),
@@ -826,7 +890,143 @@ class SupportScreen extends StatelessWidget {
 }
 
 // =====================================================================
-// 4. ECRÃ DE RECURSOS ÚTEIS (Com os dados completos)
+// 4. GUIA DE SEGURANÇA DIGITAL (Completo com as 7 categorias)
+// =====================================================================
+class DigitalSafetyScreen extends StatelessWidget {
+  const DigitalSafetyScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> safetySections = [
+      {
+        'title': 'Endereço de email',
+        'icon': Icons.email_outlined,
+        'screen': const GenericDetailSubScreen(
+          title: 'Endereço de email',
+          intro: 'Mantenha o seu e-mail seguro utilizando palavras-passe fortes e verificando os dispositivos associados.',
+          subItems: [
+            {'title': 'Palavras-passe:', 'text': 'Evite combinações fáceis de adivinhar e ative a verificação em dois passos.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Browsers',
+        'icon': Icons.language,
+        'screen': const GenericDetailSubScreen(
+          title: 'Browsers',
+          intro: 'Utilize o modo de navegação privada e limpe regularmente o histórico de pesquisa.',
+          subItems: [
+            {'title': 'Modo Anónimo:', 'text': 'Impede que o navegador guarde o registo das páginas visitadas.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Redes Sociais',
+        'icon': Icons.share,
+        'screen': const GenericDetailSubScreen(
+          title: 'Redes Sociais',
+          intro: 'Reveja as definições de privacidade e evite partilhar a localização em tempo real.',
+          subItems: [
+            {'title': 'Privacidade:', 'text': 'Defina perfis como privados e limite o acesso a estranhos.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Dispositivos Eletrónicos',
+        'icon': Icons.devices,
+        'screen': const GenericDetailSubScreen(
+          title: 'Dispositivos Eletrónicos',
+          intro: 'Proteja o seu telemóvel com códigos PIN ou biometria seguros.',
+          subItems: [
+            {'title': 'Bloqueio:', 'text': 'Configure o telemóvel para bloquear automaticamente após curtos períodos de inatividade.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Aplicações de Mensagens',
+        'icon': Icons.message_outlined,
+        'screen': const GenericDetailSubScreen(
+          title: 'Aplicações de Mensagens',
+          intro: 'Utilize aplicações com encriptação de ponta a ponta e mensagens temporárias.',
+          subItems: [
+            {'title': 'Mensagens Temporárias:', 'text': 'Faça com que conversas sensíveis desapareçam automaticamente.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Aplicações',
+        'icon': Icons.apps,
+        'screen': const GenericDetailSubScreen(
+          title: 'Aplicações',
+          intro: 'Reveja as permissões concedidas às aplicações instaladas no seu dispositivo.',
+          subItems: [
+            {'title': 'Permissões:', 'text': 'Desative o acesso à localização para aplicações que não o exijam.'},
+          ],
+        ),
+      },
+      {
+        'title': 'Jogos',
+        'icon': Icons.sports_esports,
+        'screen': const GenericDetailSubScreen(
+          title: 'Jogos',
+          intro: 'Tenha cuidado com interações em chats de jogos online.',
+          subItems: [
+            {'title': 'Chat:', 'text': 'Evite partilhar informações pessoais ou rotinas em plataformas de jogos.'},
+          ],
+        ),
+      },
+    ];
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Guia de segurança digital')),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16.0),
+            child: Text(
+              'Esteja mais seguro(a) online\n\n'
+              'Os perpetradores de violência doméstica podem utilizar ferramentas digitais para controlar as vítimas através de assédio ou geolocalização.',
+              style: TextStyle(fontSize: 14, height: 1.5, color: Color(0xFFF1DAC4)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text('Saber Mais', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF48A9A6))),
+          const SizedBox(height: 12),
+          ...safetySections.map((section) => Card(
+                elevation: 2,
+                color: const Color(0xFF23324D),
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: const Color(0xFF48A9A6).withValues(alpha: 0.3)),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => section['screen']));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+                    child: Row(
+                      children: [
+                        Icon(section['icon'], color: const Color(0xFF48A9A6), size: 24),
+                        const SizedBox(width: 16),
+                        Expanded(child: Text(section['title'], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)))),
+                        const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF48A9A6)),
+                      ],
+                    ),
+                  ),
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+// =====================================================================
+// 5. ECRÃ DE LINHAS DE APOIO
 // =====================================================================
 class ResourcesScreen extends StatelessWidget {
   const ResourcesScreen({super.key});
@@ -838,13 +1038,13 @@ class ResourcesScreen extends StatelessWidget {
         'title': '1. Linha LGBT',
         'hours': 'Disponível de quinta a sábado, das 20:00 às 23:00',
         'phone': '218873922',
-        'description': 'A Linha LGBT da associação ILGA Portugal, é uma linha telefónica de apoio e informação sobre questões LGBT...'
+        'description': 'A Linha LGBT da associação ILGA Portugal, é uma linha telefónica de apoio e informação sobre questões LGBT.'
       },
       {
         'title': '2. SMS Segurança',
         'hours': '24 horas por dia',
         'phone': '961010200',
-        'description': 'Permite às pessoas surdas enviar um SMS, sendo este comunicado verbalmente pelos operadores da GNR...'
+        'description': 'Permite às pessoas surdas enviar um SMS, sendo este comunicado verbalmente pelos operadores da GNR.'
       },
       {
         'title': '3. Linha Nacional de Emergência Social',
@@ -865,27 +1065,15 @@ class ResourcesScreen extends StatelessWidget {
         'description': 'Serviço de atendimento telefónico prestado pela APAV, gratuito e confidencial.'
       },
       {
-        'title': '6. Linha SMS 3060: Segurança em isolamento',
-        'hours': '24 horas por dia (Gratuita)',
-        'phone': '800202148 / SMS: 3060',
-        'description': 'Permite o envio de mensagens de texto rápidas (SMS) pelas vítimas de violência doméstica.'
-      },
-      {
-        'title': '7. Linha SOS Mulher',
-        'hours': '24 horas por dia',
-        'phone': '808200175',
-        'description': 'Presta apoio anónimo e confidencial a mulheres vítimas de violência conjugal.'
-      },
-      {
-        'title': '8. 112 - Número Europeu de Emergência',
+        'title': '6. 112 - Número Europeu de Emergência',
         'hours': '24 horas por dia (Gratuita)',
         'phone': '112',
-        'description': 'Contacto imediato para situações de perigo iminente para a vida, integridade física ou segurança.'
+        'description': 'Contacto imediato para situações de perigo iminente para a vida ou integridade física.'
       },
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Recursos Úteis')),
+      appBar: AppBar(title: const Text('Linhas de Apoio')),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: resources.length,
@@ -893,24 +1081,28 @@ class ResourcesScreen extends StatelessWidget {
           final res = resources[index];
           return Card(
             elevation: 2,
+            color: const Color(0xFF23324D),
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: const Color(0xFF48A9A6).withValues(alpha: 0.3)),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(res['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1565C0))),
+                  Text(res['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF48A9A6))),
                   const SizedBox(height: 4),
-                  Text(res['hours']!, style: TextStyle(color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.w600)),
+                  Text(res['hours']!, style: const TextStyle(color: Color(0xFFF1DAC4), fontSize: 12, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
-                  Text(res['description']!, style: const TextStyle(fontSize: 14, height: 1.4)),
+                  Text(res['description']!, style: const TextStyle(fontSize: 14, height: 1.4, color: Color(0xFFF1DAC4))),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.phone, size: 16, color: Color(0xFFA0522D)),
+                      const Icon(Icons.phone, size: 16, color: Color(0xFF48A9A6)),
                       const SizedBox(width: 6),
-                      Text('Contacto: ${res['phone']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFA0522D))),
+                      Text('Contacto: ${res['phone']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF48A9A6))),
                     ],
                   ),
                 ],
@@ -924,535 +1116,8 @@ class ResourcesScreen extends StatelessWidget {
 }
 
 // =====================================================================
-// 5. OUTROS ECRÃS (DigitalSafety, Diary, Emergency)
+// 6. ECRÃ DE EMERGÊNCIA
 // =====================================================================
-class DigitalSafetyScreen extends StatelessWidget {
-  const DigitalSafetyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Guia de Segurança Digital')),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Text(
-          'Aprenda a apagar o histórico de navegação, proteger as suas palavras-passe, usar o modo de navegação anónima e detetar aplicações de spyware ou monitorização no seu telemóvel.',
-          style: TextStyle(fontSize: 15, height: 1.5, color: Colors.black87),
-        ),
-      ),
-    );
-  }
-}
-
-// =====================================================================
-// ECRÃ DO DIÁRIO SECRETO DE EVIDÊNCIAS
-// =====================================================================
-class DiaryScreen extends StatefulWidget {
-  const DiaryScreen({super.key});
-
-  @override
-  State<DiaryScreen> createState() => _DiaryScreenState();
-}
-
-class _DiaryScreenState extends State<DiaryScreen> {
-  List<IncidentEntry> _incidents = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadIncidents();
-  }
-
-  Future<void> _loadIncidents() async {
-    setState(() => _isLoading = true);
-    final list = await DiaryService.getIncidents();
-    if (mounted) {
-      setState(() {
-        _incidents = list;
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _deleteIncident(String id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar Registo'),
-        content: const Text('Tens a certeza de que queres eliminar este registo de incidente do diário?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Eliminar', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await DiaryService.deleteIncident(id);
-      _loadIncidents();
-    }
-  }
-
-  void _showAddIncidentDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => AddIncidentModal(
-        onSaved: _loadIncidents,
-      ),
-    );
-  }
-
-  Color _getSeverityColor(String severity) {
-    switch (severity) {
-      case 'Elevado':
-        return Colors.red.shade700;
-      case 'Médio':
-        return Colors.orange.shade800;
-      case 'Baixo':
-      default:
-        return Colors.green.shade700;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFFAFA),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadIncidents,
-              child: ListView(
-                padding: const EdgeInsets.all(16.0),
-                children: [
-                  // Banner de Segurança e Instruções Legais
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1565C0).withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.2)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.shield, color: Color(0xFF1565C0), size: 28),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Diário Secreto de Evidências 📓',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1565C0)),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Estes registos são guardados exclusivamente no teu dispositivo. Podes anotar episódios, datas e detalhes para servirem de prova junto da APAV ou autoridades.',
-                                style: TextStyle(fontSize: 13, color: Colors.grey.shade800, height: 1.4),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Lista de Incidentes ou Estado Vazio
-                  if (_incidents.isEmpty)
-                    Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Column(
-                          children: [
-                            Icon(Icons.menu_book, size: 54, color: Colors.grey.shade400),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Nenhum Incidente Registado',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'O teu diário está limpo. Clica no botão abaixo sempre que precisares de registar um evento em segurança.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    ..._incidents.map((incident) {
-                      final severityColor = _getSeverityColor(incident.severity);
-                      final formattedDate =
-                          '${incident.date.day.toString().padLeft(2, '0')}/${incident.date.month.toString().padLeft(2, '0')}/${incident.date.year} às ${incident.date.hour.toString().padLeft(2, '0')}:${incident.date.minute.toString().padLeft(2, '0')}';
-
-                      return Card(
-                        elevation: 3,
-                        margin: const EdgeInsets.only(bottom: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                // Faixa Lateral Indicadora da Gravidade
-                                Container(
-                                  width: 6,
-                                  color: severityColor,
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            // Badge da Data
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  formattedDate,
-                                                  style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
-                                                ),
-                                              ],
-                                            ),
-                                            // Badge da Gravidade
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: severityColor.withValues(alpha: 0.12),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                'Gravidade: ${incident.severity}',
-                                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: severityColor),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          incident.title,
-                                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue.shade50,
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Text(
-                                            incident.category,
-                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue.shade800),
-                                          ),
-                                        ),
-                                        if (incident.description.isNotEmpty) ...[
-                                          const Divider(height: 16),
-                                          Text(
-                                            incident.description,
-                                            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
-                                          ),
-                                        ],
-                                        const SizedBox(height: 8),
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                                            tooltip: 'Eliminar registo',
-                                            onPressed: () => _deleteIncident(incident.id),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                ],
-              ),
-            ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF1565C0),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Registar Incidente', style: TextStyle(fontWeight: FontWeight.bold)),
-        onPressed: _showAddIncidentDialog,
-      ),
-    );
-  }
-}
-
-// =====================================================================
-// MODAL DE REGISTO DE NOVO INCIDENTE
-// =====================================================================
-class AddIncidentModal extends StatefulWidget {
-  final VoidCallback onSaved;
-
-  const AddIncidentModal({super.key, required this.onSaved});
-
-  @override
-  State<AddIncidentModal> createState() => _AddIncidentModalState();
-}
-
-class _AddIncidentModalState extends State<AddIncidentModal> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descController = TextEditingController();
-
-  DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
-  String _selectedCategory = 'Violência Psicológica';
-  String _selectedSeverity = 'Médio';
-
-  final List<String> _categories = [
-    'Violência Psicológica',
-    'Violência Física',
-    'Violência Financeira',
-    'Violência Sexual',
-    'Stalking / Perseguição',
-    'Outro',
-  ];
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime,
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedTime = picked;
-      });
-    }
-  }
-
-  Future<void> _saveForm() async {
-    if (_formKey.currentState!.validate()) {
-      final finalDateTime = DateTime(
-        _selectedDate.year,
-        _selectedDate.month,
-        _selectedDate.day,
-        _selectedTime.hour,
-        _selectedTime.minute,
-      );
-
-      final entry = IncidentEntry(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: _titleController.text.trim(),
-        date: finalDateTime,
-        category: _selectedCategory,
-        severity: _selectedSeverity,
-        description: _descController.text.trim(),
-      );
-
-      await DiaryService.addIncident(entry);
-      widget.onSaved();
-      if (mounted) {
-        Navigator.pop(context);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final formattedDate = '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}';
-    final formattedTime = '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
-
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20,
-        right: 20,
-        top: 20,
-      ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Novo Registo no Diário 📓',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1565C0)),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const Divider(),
-              const SizedBox(height: 10),
-
-              // Data e Hora
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.calendar_today, size: 18),
-                      label: Text(formattedDate),
-                      onPressed: _pickDate,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.access_time, size: 18),
-                      label: Text(formattedTime),
-                      onPressed: _pickTime,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-
-              // Categoria
-              DropdownButtonFormField<String>(
-                initialValue: _selectedCategory,
-                decoration: InputDecoration(
-                  labelText: 'Tipo de Violência / Categoria',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                items: _categories.map((cat) {
-                  return DropdownMenuItem(value: cat, child: Text(cat));
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedCategory = val);
-                },
-              ),
-              const SizedBox(height: 14),
-
-              // Gravidade / Risco
-              const Text('Nível de Gravidade / Risco:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['Baixo', 'Médio', 'Elevado'].map((sev) {
-                  final isSelected = _selectedSeverity == sev;
-                  Color color = Colors.green;
-                  if (sev == 'Médio') color = Colors.orange.shade800;
-                  if (sev == 'Elevado') color = Colors.red.shade700;
-
-                  return ChoiceChip(
-                    label: Text(sev),
-                    selected: isSelected,
-                    selectedColor: color.withValues(alpha: 0.2),
-                    side: BorderSide(color: isSelected ? color : Colors.grey),
-                    labelStyle: TextStyle(
-                      color: isSelected ? color : Colors.black87,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) setState(() => _selectedSeverity = sev);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 14),
-
-              // Título
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: 'Título / Resumo Curto',
-                  hintText: 'Ex: Ameaça verbal na cozinha',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Escreve um título para o incidente.';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 14),
-
-              // Descrição
-              TextFormField(
-                controller: _descController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: 'Descrição Detalhada',
-                  hintText: 'Descreve o que aconteceu, frases ditas, testemunhas presentes, chamadas ou mensagens...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Botão Guardar
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1565C0),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: _saveForm,
-                  child: const Text('Guardar no Diário', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class EmergencyScreen extends StatelessWidget {
   const EmergencyScreen({super.key});
 
@@ -1464,24 +1129,25 @@ class EmergencyScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.phone_in_talk, size: 64, color: Colors.red),
+            const Icon(Icons.phone_in_talk, size: 64, color: Color(0xFFC86B68)),
             const SizedBox(height: 16),
             const Text(
               'Emergência - 112',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
             ),
             const SizedBox(height: 8),
             const Text(
               'Em caso de perigo imediato, ligue diretamente para as autoridades.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Colors.grey),
+              style: TextStyle(fontSize: 15, color: Color(0xFFF1DAC4)),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade700,
+                backgroundColor: const Color(0xFFC86B68),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.call),
               label: const Text('Ligar 112 Agora', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -1497,7 +1163,7 @@ class EmergencyScreen extends StatelessWidget {
 }
 
 // =====================================================================
-// ECRÃ DE ALTERAÇÃO DE CÓDIGO/SENHA SECRETA
+// 7. ALTERAR CÓDIGO SECRETO
 // =====================================================================
 class ChangePinScreen extends StatefulWidget {
   const ChangePinScreen({super.key});
@@ -1507,173 +1173,146 @@ class ChangePinScreen extends StatefulWidget {
 }
 
 class _ChangePinScreenState extends State<ChangePinScreen> {
-  final TextEditingController _pinController = TextEditingController();
-  final TextEditingController _confirmPinController = TextEditingController();
-  String _currentPin = SecretCodeService.defaultCode;
-  String? _statusMessage;
-  bool _isSuccess = false;
+  final _currentController = TextEditingController();
+  final _newController = TextEditingController();
+  final _confirmController = TextEditingController();
+  String? _message;
+  bool _success = false;
+  bool _loading = true;
+  String _currentPin = '1234';
 
   @override
   void initState() {
     super.initState();
-    _loadCurrentPin();
+    _loadPin();
   }
 
   @override
   void dispose() {
-    _pinController.dispose();
-    _confirmPinController.dispose();
+    _currentController.dispose();
+    _newController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadCurrentPin() async {
+  Future<void> _loadPin() async {
     final pin = await SecretCodeService.getSecretCode();
-    if (mounted) {
-      setState(() {
-        _currentPin = pin;
-      });
-    }
+    setState(() {
+      _currentPin = pin;
+      _loading = false;
+    });
   }
 
-  Future<void> _saveNewPin() async {
-    final newPin = _pinController.text.trim();
-    final confirmPin = _confirmPinController.text.trim();
-
-    if (newPin.isEmpty) {
-      setState(() {
-        _statusMessage = 'Por favor, escreve um novo código/senha.';
-        _isSuccess = false;
-      });
+  Future<void> _changePin() async {
+    if (_currentController.text.trim() != _currentPin) {
+      setState(() { _message = 'Código atual incorreto.'; _success = false; });
       return;
     }
-
-    if (newPin != confirmPin) {
-      setState(() {
-        _statusMessage = 'Os dois códigos não coincidem. Tenta novamente.';
-        _isSuccess = false;
-      });
+    if (_newController.text.trim().length < 4) {
+      setState(() { _message = 'O novo código deve ter pelo menos 4 caracteres.'; _success = false; });
       return;
     }
-
-    await SecretCodeService.setSecretCode(newPin);
-    if (mounted) {
-      setState(() {
-        _currentPin = newPin;
-        _statusMessage = 'Código secreto alterado com sucesso!';
-        _isSuccess = true;
-        _pinController.clear();
-        _confirmPinController.clear();
-      });
+    if (_newController.text.trim() != _confirmController.text.trim()) {
+      setState(() { _message = 'Os códigos não coincidem.'; _success = false; });
+      return;
     }
+    await SecretCodeService.setSecretCode(_newController.text.trim());
+    setState(() {
+      _currentPin = _newController.text.trim();
+      _message = 'Código alterado com sucesso!';
+      _success = true;
+      _currentController.clear();
+      _newController.clear();
+      _confirmController.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Alterar Código Secreto')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
-              child: Icon(Icons.security, size: 64, color: Color(0xFF1565C0)),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Personaliza o teu Código de Acesso',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Este é o código que deves introduzir na caixa "Resgatar Código" do jogo para abrir este painel oculto.',
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.4),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1565C0).withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.2)),
-              ),
-              child: Row(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF48A9A6)))
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
                 children: [
-                  const Icon(Icons.info_outline, color: Color(0xFF1565C0)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Código secreto atual: "$_currentPin"',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1565C0), fontSize: 15),
+                  const Icon(Icons.lock_outline, size: 64, color: Color(0xFF48A9A6)),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Altere o código secreto de acesso ao painel',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Color(0xFFF1DAC4)),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildField(_currentController, 'Código Atual'),
+                  const SizedBox(height: 16),
+                  _buildField(_newController, 'Novo Código'),
+                  const SizedBox(height: 16),
+                  _buildField(_confirmController, 'Confirmar Novo Código'),
+                  const SizedBox(height: 24),
+                  if (_message != null)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _success
+                            ? const Color(0xFF48A9A6).withValues(alpha: 0.15)
+                            : const Color(0xFFC86B68).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _success ? Icons.check_circle_outline : Icons.error_outline,
+                            color: _success ? const Color(0xFF48A9A6) : const Color(0xFFC86B68),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _message!,
+                              style: TextStyle(
+                                color: _success ? const Color(0xFF48A9A6) : const Color(0xFFC86B68),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF48A9A6),
+                      foregroundColor: const Color(0xFF18243A),
+                      minimumSize: const Size(double.infinity, 52),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: _changePin,
+                    child: const Text('Alterar Código', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _pinController,
-              decoration: InputDecoration(
-                labelText: 'Novo Código Secreto',
-                hintText: 'Ex: 5678 ou OMEUCODIGO',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                prefixIcon: const Icon(Icons.lock_open),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _confirmPinController,
-              decoration: InputDecoration(
-                labelText: 'Confirmar Novo Código',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                prefixIcon: const Icon(Icons.lock),
-              ),
-            ),
-            if (_statusMessage != null) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _isSuccess ? Colors.green.shade300 : Colors.red.shade300),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isSuccess ? Icons.check_circle : Icons.error_outline,
-                      color: _isSuccess ? Colors.green.shade800 : Colors.red.shade800,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _statusMessage!,
-                        style: TextStyle(
-                          color: _isSuccess ? Colors.green.shade800 : Colors.red.shade800,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1565C0),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: _saveNewPin,
-                child: const Text('Guardar Novo Código', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
+    );
+  }
+
+  Widget _buildField(TextEditingController ctrl, String label) {
+    return TextField(
+      controller: ctrl,
+      obscureText: true,
+      keyboardType: TextInputType.number,
+      style: const TextStyle(color: Color(0xFFF1DAC4)),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF48A9A6)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF48A9A6)),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF48A9A6), width: 2),
+        ),
+        prefixIcon: const Icon(Icons.lock, color: Color(0xFF48A9A6)),
       ),
     );
   }
