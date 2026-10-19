@@ -224,8 +224,8 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
                     scale = _popAnimation.value;
                   }
                   if (isClearing) {
-                    scale = _clearAnimation.value;
-                    opacity = _clearAnimation.value;
+                    scale = _clearAnimation.value.clamp(0.0, 1.0);
+                    opacity = _clearAnimation.value.clamp(0.0, 1.0);
                   }
 
                   return Transform.scale(
