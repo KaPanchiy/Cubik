@@ -14,11 +14,11 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         foregroundColor: Colors.white,
         centerTitle: true,
-        title: const Text('Block Blast', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+        title: const Text('Cubik', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
         actions: [
           IconButton(
             icon: const Icon(Icons.card_giftcard, color: Colors.orange, size: 26),
-            tooltip: 'Resgatar Código Promo',
+            tooltip: 'Resgatar Código',
             onPressed: () => RedeemCodeDialog.show(context),
           ),
         ],
@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'BLOCK BLAST',
+                  'Cubik',
                   style: TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.w900,
