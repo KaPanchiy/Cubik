@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubik - Apoio e Segurança Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette Padrão - Modo Escuro */
+            --bg-dark: #18243A;
+            --header-bg: #18243A;
+            --card-bg: #23324D;
+            --card-hover: #1C2A42;
+            --teal: #48A9A6;
+            --coral: #C86B68;
+            --cream: #F1DAC4;
+            --white: #FFFFFF;
+            --gray-text: #A0AEC0;
+            --text-main: #F1DAC4;
+            --text-sub: rgba(241, 218, 196, 0.85);
+            --border-color: rgba(72, 169, 166, 0.25);
+            --footer-bg: #0F172A;
+            --hero-bg: linear-gradient(135deg, rgba(72, 169, 166, 0.15), rgba(35, 50, 77, 0.6));
+        }
+
+        [data-theme="light"] {
+            /* Palette Adaptada - Modo Claro */
+            --bg-dark: #F8FAFC;
+            --header-bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --card-hover: #F1F5F9;
+            --teal: #368583;
+            --coral: #C86B68;
+            --cream: #18243A;
+            --white: #FFFFFF;
+            --gray-text: #64748B;
+            --text-main: #18243A;
+            --text-sub: #334155;
+            --border-color: rgba(54, 133, 131, 0.3);
+            --footer-bg: #18243A;
+            --hero-bg: linear-gradient(135deg, rgba(72, 169, 166, 0.12), rgba(241, 245, 249, 0.9));
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Banner de Emergência Superior */
+        .emergency-bar {
+            background-color: #0F172A;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-112-call {
+            background-color: transparent;
+            color: #FFFFFF;
+            border: 1.5px solid var(--white);
+            padding: 4px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-112-call:hover {
+            background-color: var(--white);
+            color: #0F172A;
+        }
+
+        /* Header Principal de Navegação */
+        header {
+            background-color: var(--header-bg);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--teal), #23324D);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(72, 169, 166, 0.4);
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 18px;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 4px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link.active {
+            color: var(--teal);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--teal);
+            border-radius: 2px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--teal);
+            transform: scale(1.05);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 6px 12px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+            width: 90px;
+        }
+
+        .quick-exit-btn {
+            background-color: var(--coral);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(200, 107, 104, 0.3);
+        }
+
+        .quick-exit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(200, 107, 104, 0.5);
+            background-color: #B55A57;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 40px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-title {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            line-height: 1.15;
+        }
+
+        .hero-description {
+            font-size: 15px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .hero-illustration {
+            width: 100%;
+            height: 220px;
+            background: var(--hero-bg);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Contentor Principal */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        /* Grelha de Cartões */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--teal);
+            box-shadow: 0 12px 32px rgba(72, 169, 166, 0.2);
+        }
+
+        .card-graphic {
+            height: 170px;
+            background: var(--hero-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
+        }
+
+        .card-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+            flex-grow: 1;
+        }
+
+        .card-btn {
+            align-self: flex-start;
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1.5px solid var(--teal);
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-btn:hover {
+            background-color: var(--teal);
+            color: #FFFFFF;
+        }
+
+        .card-btn.primary {
+            background-color: var(--teal);
+            color: #FFFFFF;
+        }
+
+        .card-btn.primary:hover {
+            background-color: #2E6F6D;
+        }
+
+        /* Questionário Inline Wizard */
+        .quiz-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--teal);
+            border-radius: 20px;
+            padding: 32px;
+            margin-top: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .quiz-counter {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 12px;
+        }
+
+        .quiz-question-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .quiz-answers-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-ans-btn {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1.5px solid var(--teal);
+            padding: 12px 28px;
+            border-radius: 24px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .quiz-ans-btn:hover, .quiz-ans-btn.selected {
+            background-color: var(--teal);
+            color: #FFFFFF;
+        }
+
+        /* Linhas de Apoio */
+        .support-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .support-item-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        .support-item-card:hover {
+            border-color: var(--teal);
+            transform: translateX(4px);
+        }
+
+        .support-item-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 6px;
+        }
+
+        .support-item-hours {
+            font-size: 13px;
+            color: var(--text-main);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .support-item-desc {
+            font-size: 14px;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        /* Secção Sobre Nós */
+        .about-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .about-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+
+        .about-card h3 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--teal);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .about-card p {
+            font-size: 15px;
+            color: var(--text-sub);
+            line-height: 1.7;
+            margin-bottom: 14px;
+        }
+
+        .about-values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .value-item {
+            background: var(--hero-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .value-item h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .value-item p {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin: 0;
+        }
+
+        /* Rodapé */
+        footer {
+            background-color: var(--footer-bg);
+            color: #F1DAC4;
+            border-top: 1px solid var(--border-color);
+            margin-top: 60px;
+            padding: 40px 32px 24px 32px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 32px;
+        }
+
+        .footer-brand .logo-container {
+            margin-bottom: 12px;
+        }
+
+        .footer-brand p {
+            font-size: 13px;
+            color: rgba(241, 218, 196, 0.7);
+            line-height: 1.6;
+            max-width: 380px;
+        }
+
+        .footer-column h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 16px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-links a {
+            color: rgba(241, 218, 196, 0.8);
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .footer-links a:hover {
+            color: var(--teal);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 12px;
+            color: rgba(241, 218, 196, 0.6);
+        }
+
+        /* Modais */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background-color: var(--bg-dark);
+            border: 1px solid var(--teal);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 650px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                display: none;
+            }
+
+            header {
+                padding: 16px;
+            }
+
+            .hero-title {
+                font-size: 32px;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .support-item-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Banner de Emergência Superior -->
+    <div class="emergency-bar">
+        <span>Se for uma emergência, ligue para 112 para obter ajuda imediata.</span>
+        <a href="tel:112" class="btn-112-call">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Ligar 112
+        </a>
+    </div>
+
+    <!-- Header Principal -->
+    <header>
+        <div class="logo-container" onclick="switchTab('inicio')">
+            <div class="logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F1DAC4" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18"/><path d="M15 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+            </div>
+            <span class="logo-text">Cubik</span>
+        </div>
+
+        <ul class="nav-tabs">
+            <li><a class="nav-link active" onclick="switchTab('inicio')">Início</a></li>
+            <li><a class="nav-link" onclick="switchTab('reconhecer')">Reconhecer o abuso</a></li>
+            <li><a class="nav-link" onclick="switchTab('compreender')">Compreender o abuso</a></li>
+            <li><a class="nav-link" onclick="switchTab('procurar')">Procurar apoio</a></li>
+            <li><a class="nav-link" onclick="switchTab('prestar')">Prestar apoio</a></li>
+            <li><a class="nav-link" onclick="switchTab('seguranca')">Segurança Digital</a></li>
+            <li><a class="nav-link" onclick="switchTab('sobre')">Sobre Nós</a></li>
+        </ul>
+
+        <div class="nav-actions">
+            <!-- Alternador de Tema Claro / Escuro -->
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Alternar Modo Claro/Escuro" id="theme-btn">☀️</button>
+
+            <div class="search-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A0AEC0" stroke-width="2" style="margin-right: 6px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Pesquisar...">
+            </div>
+            <button class="quick-exit-btn" onclick="quickExit()">
+                Sair do site &rarr;
+            </button>
+        </div>
+    </header>
+
+    <!-- Secção Hero Dinâmica -->
+    <section class="hero-section">
+        <div>
+            <h1 class="hero-title" id="hero-title">Bem-vindo ao Cubik</h1>
+            <p class="hero-description" id="hero-desc">
+                Uma plataforma segura, confidencial e discreta de informação e apoio no combate à violência doméstica.
+            </p>
+        </div>
+        <div class="hero-illustration">
+            <svg width="260" height="160" viewBox="0 0 260 160" fill="none">
+                <ellipse cx="130" cy="120" rx="100" ry="25" fill="#48A9A6" fill-opacity="0.2"/>
+                <circle cx="85" cy="50" r="14" fill="#F1DAC4"/>
+                <path d="M72 75 C 72 65, 98 65, 98 75 L 95 110 L 75 110 Z" fill="#C86B68"/>
+                <path d="M75 110 L 70 140 M 95 110 L 98 140" stroke="#F1DAC4" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="175" cy="50" r="14" fill="#F1DAC4"/>
+                <path d="M162 75 C 162 65, 188 65, 188 75 L 185 110 L 165 110 Z" fill="#48A9A6"/>
+                <path d="M165 110 L 160 140 M 185 110 L 188 140" stroke="#F1DAC4" stroke-width="5" stroke-linecap="round"/>
+                <rect x="105" y="35" width="50" height="65" rx="6" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                <circle cx="115" cy="48" r="3" fill="#F1DAC4"/>
+                <rect x="122" y="46" width="25" height="4" rx="2" fill="#F1DAC4"/>
+                <circle cx="115" cy="60" r="3" fill="#F1DAC4"/>
+                <rect x="122" y="58" width="25" height="4" rx="2" fill="#F1DAC4"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Contentor Principal -->
+    <main class="content-container">
+        <div id="tab-content">
+            <!-- Conteúdo carregado via JS -->
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F1DAC4" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18"/><path d="M15 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+                    </div>
+                    <span class="logo-text" style="color: #F1DAC4;">Cubik</span>
+                </div>
+                <p>
+                    Plataforma e aplicação desenvolvidas no âmbito da Prova de Aptidão Profissional (PAP) no curso de Gestão e Programação de Sistemas Informáticos (GPSI) da Escola Profissional Bento de Jesus Caraça (EPBJC) no Porto.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Navegação Rápida</h4>
+                <ul class="footer-links">
+                    <li><a onclick="switchTab('inicio')">Início</a></li>
+                    <li><a onclick="switchTab('reconhecer')">Reconhecer o abuso</a></li>
+                    <li><a onclick="switchTab('compreender')">Compreender o abuso</a></li>
+                    <li><a onclick="switchTab('procurar')">Procurar apoio</a></li>
+                    <li><a onclick="switchTab('prestar')">Prestar apoio</a></li>
+                    <li><a onclick="switchTab('seguranca')">Segurança Digital</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Privacidade e Apoio</h4>
+                <ul class="footer-links">
+                    <li><a onclick="quickExit()">Sair do site com segurança</a></li>
+                    <li><a onclick="switchTab('sobre')">Sobre o Projeto PAP</a></li>
+                    <li><a href="tel:112">Emergência Nacional: 112</a></li>
+                    <li><a href="tel:800202148">Linha Violência Doméstica: 800 202 148</a></li>
+                    <li><a href="tel:116006">APAV: 116 006</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>&copy; 2026 Cubik — Todos os direitos reservados. Projeto PAP / GPSI - EPBJC.</span>
+            <span>Aviso: Em caso de perigo imediato, utilize o botão "Sair do site" ou ligue 112.</span>
+        </div>
+    </footer>
+
+    <!-- Modal para Questionários e Detalhes -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-card" id="modal-card">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // Alternar Modo Claro / Escuro
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('theme-btn');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+                btn.innerText = '☀️';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                btn.innerText = '🌙';
+            }
+        }
+
+        // Ilustrações SVG
+        const svgGraphics = {
+            personQuestion: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <circle cx="110" cy="40" r="14" fill="#F1DAC4"/>
+                    <path d="M98 62 C 98 52, 122 52, 122 62 L 120 95 L 100 95 Z" fill="#48A9A6"/>
+                    <circle cx="70" cy="30" r="12" fill="#23324D" stroke="#48A9A6" stroke-width="1.5"/>
+                    <text x="66" y="35" fill="#F1DAC4" font-size="14" font-weight="bold">?</text>
+                </svg>`,
+            friendsTalk: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="85" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <circle cx="75" cy="45" r="13" fill="#F1DAC4"/>
+                    <path d="M64 65 C 64 56, 86 56, 86 65 L 84 95 L 66 95 Z" fill="#C86B68"/>
+                    <circle cx="145" cy="45" r="13" fill="#F1DAC4"/>
+                    <path d="M134 65 C 134 56, 156 56, 156 65 L 154 95 L 136 95 Z" fill="#48A9A6"/>
+                </svg>`,
+            diarySecurity: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <rect x="75" y="25" width="70" height="75" rx="8" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <rect x="85" y="40" width="50" height="5" rx="2" fill="#F1DAC4"/>
+                    <rect x="125" y="65" width="24" height="20" rx="4" fill="#C86B68"/>
+                </svg>`,
+            physicalViolence: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <path d="M90 40 L130 40 L120 85 L100 85 Z" fill="#C86B68"/>
+                    <circle cx="110" cy="30" r="10" fill="#F1DAC4"/>
+                </svg>`,
+            psychologicalViolence: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <circle cx="110" cy="45" r="22" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <path d="M100 45 Q110 30 120 45 T110 60" stroke="#F1DAC4" stroke-width="2" fill="none"/>
+                </svg>`,
+            financialViolence: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <rect x="80" y="35" width="60" height="40" rx="6" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <circle cx="110" cy="55" r="8" fill="#F1DAC4"/>
+                </svg>`,
+            sexualViolence: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <circle cx="110" cy="50" r="24" stroke="#C86B68" stroke-width="3" fill="none"/>
+                    <line x1="93" y1="33" x2="127" y2="67" stroke="#C86B68" stroke-width="3"/>
+                </svg>`,
+            stalkingViolence: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <circle cx="95" cy="45" r="16" stroke="#48A9A6" stroke-width="2"/>
+                    <circle cx="125" cy="45" r="16" stroke="#48A9A6" stroke-width="2"/>
+                </svg>`,
+            digitalEmail: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <rect x="70" y="35" width="80" height="50" rx="6" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <path d="M70 35 L110 65 L150 35" stroke="#F1DAC4" stroke-width="2"/>
+                </svg>`,
+            digitalBrowser: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <rect x="65" y="30" width="90" height="60" rx="6" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <circle cx="75" cy="40" r="3" fill="#C86B68"/>
+                    <circle cx="85" cy="40" r="3" fill="#F1DAC4"/>
+                    <circle cx="95" cy="40" r="3" fill="#48A9A6"/>
+                </svg>`,
+            digitalSocial: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <circle cx="80" cy="60" r="14" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <circle cx="140" cy="60" r="14" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <circle cx="110" cy="35" r="14" fill="#23324D" stroke="#C86B68" stroke-width="2"/>
+                </svg>`,
+            digitalDevice: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <rect x="85" y="25" width="50" height="75" rx="8" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                    <circle cx="110" cy="90" r="3" fill="#F1DAC4"/>
+                </svg>`,
+            digitalMessage: `
+                <svg width="220" height="130" viewBox="0 0 220 130" fill="none">
+                    <ellipse cx="110" cy="105" rx="80" ry="18" fill="#48A9A6" fill-opacity="0.2"/>
+                    <path d="M70 35 H150 C155 35, 160 40, 160 45 V75 C160 80, 155 85, 150 85 H90 L70 100 V85 C65 85, 60 80, 60 75 V45 C60 40, 65 35, 70 35 Z" fill="#23324D" stroke="#48A9A6" stroke-width="2"/>
+                </svg>`
+        };
+
+        // Dados da Aplicação Cubik
+        const tabData = {
+            inicio: {
+                title: "Bem-vindo ao Cubik",
+                desc: "Uma plataforma e aplicação móvel concebidas para proporcionar orientação confidencial, avaliação de risco e segurança digital a quem precisa de apoio.",
+                cards: [
+                    {
+                        title: "Avaliar o Meu Risco",
+                        text: "Responda a um questionário confidencial em formato simples para compreender os sinais de alerta na sua relação.",
+                        btn: "Fazer Avaliação &rarr;",
+                        svg: svgGraphics.personQuestion,
+                        action: () => switchTab('reconhecer')
+                    },
+                    {
+                        title: "Linhas de Apoio 24h",
+                        text: "Aceda imediatamente à lista completa de contactos nacionais gratuitos de emergência, APAV e apoio social.",
+                        btn: "Ver Linhas de Apoio &rarr;",
+                        svg: svgGraphics.friendsTalk,
+                        action: () => switchTab('procurar')
+                    },
+                    {
+                        title: "Diário Seguro (App Cubik)",
+                        text: "Descubra como a nossa aplicação Android camufla um diário encriptado sob a forma de um jogo de blocos.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.diarySecurity,
+                        action: () => openDiaryInfo()
+                    },
+                    {
+                        title: "Guia de Segurança Digital",
+                        text: "Aprenda a proteger o seu telemóvel, e-mail e redes sociais de monitorizações e rastreios indevidos.",
+                        btn: "Ver Dicas de Segurança &rarr;",
+                        svg: svgGraphics.digitalDevice,
+                        action: () => switchTab('seguranca')
+                    }
+                ]
+            },
+            reconhecer: {
+                title: "Reconhecer o abuso",
+                desc: "A violência doméstica é qualquer tipo de violência no âmbito de uma relação familiar próxima ou íntima. Estes questionários foram criados para ajudar a orientá-lo(a) a reconhecer os sinais de risco e a compreender os passos que pode adotar.",
+                cards: [
+                    {
+                        title: "Estarei em risco?",
+                        text: "Estas perguntas simples ajudá-lo(a)-ão a compreender os sinais de violência doméstica na(s) sua(s) relação(ões).",
+                        btn: "Responder ao questionário",
+                        svg: svgGraphics.personQuestion,
+                        action: () => startInlineQuiz(true)
+                    },
+                    {
+                        title: "Familiar ou amigo em risco?",
+                        text: "Estas perguntas ajudá-lo(a)-ão a compreender os sinais de violência doméstica na relação de alguém por quem se preocupa.",
+                        btn: "Responder ao questionário",
+                        svg: svgGraphics.friendsTalk,
+                        action: () => startInlineQuiz(false)
+                    },
+                    {
+                        title: "O meu diário seguro",
+                        text: "O nosso diário encriptado pode ajudá-lo(a) a registar o histórico de ocorrências e provas de forma totalmente confidencial.",
+                        btn: "Saber mais sobre o diário",
+                        svg: svgGraphics.diarySecurity,
+                        action: () => openDiaryInfo()
+                    }
+                ]
+            },
+            compreender: {
+                title: "Compreender o abuso",
+                desc: "Pode ser difícil e confuso reconhecer as muitas formas que a violência doméstica pode assumir. Estes guias fornecem informações simples para o(a) ajudar a compreender melhor os comportamentos abusivos habituais.",
+                cards: [
+                    {
+                        title: "Violência Física",
+                        text: "Conduta que envolve o uso direto da força contra outra pessoa, atingindo a sua integridade corporal ou a sua saúde.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.physicalViolence,
+                        action: () => openDetailModal("Violência Física", "A violência física é qualquer conduta que envolve o uso direto da força contra outra pessoa, atingindo a sua integridade corporal ou a sua saúde. Como uma das formas mais evidentes de agressão, pode manifestar-se de diversas maneiras, como agressões, espancamentos e socos, podendo ser também acompanhada por outras formas de violência, tais como a psicológica e a sexual.<br><br>As suas consequências vão muito além das lesões corporais, incluindo sérios danos emocionais e psicológicos que podem durar por toda a vida da vítima.<br><br><b>Como pedir ajuda:</b> Procure atendimento médico imediato se estiver ferida(o) para registo de lesões. Contacte o 112 em caso de perigo iminente ou a Linha de Apoio à Vítima (800 202 148).")
+                    },
+                    {
+                        title: "Violência Psicológica e Controlo Coercivo",
+                        text: "Agressões sem contacto físico — como humilhações, menosprezos e isolamento social — que causam danos profundos.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.psychologicalViolence,
+                        action: () => openDetailModal("Violência Psicológica e Controlo Coercivo", "A violência psicológica consiste em agressões sem contacto físico — como humilhações, desvalorizações e menosprezos verbais — que causam danos emocionais profundos. Embora invisível, afeta profundamente a autoestima, a autonomia e a capacidade de reação da vítima.<br><br>Envolve táticas sistemáticas de controlo coercivo, isolamento social face a familiares e amigos, e ameaças constantes que geram um clima de medo permanente.<br><br><b>Como pedir ajuda:</b> Registe episódios num diário seguro. Fale com pessoas de confiança e contacte a linha especializada 800 202 148.")
+                    },
+                    {
+                        title: "Violência Financeira e Económica",
+                        text: "Comportamentos que visam dominar a vítima através da restrição ou manipulação dos seus recursos económicos.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.financialViolence,
+                        action: () => openDetailModal("Violência Financeira e Económica", "A violência económica e financeira engloba qualquer comportamento que visa dominar a vítima através da restrição ou manipulação do seu acesso a recursos económicos. Inclui a proibição de trabalhar ou estudar, o controlo total dos rendimentos e a ocultação de informação financeira.<br><br>Esta forma de controlo priva a pessoa de independência, dificultando imenso a sua capacidade de se afastar do contexto abusivo.<br><br><b>Como pedir ajuda:</b> Tente guardar cópias de documentos e comprovativos financeiros num local seguro ou digital. Procure aconselhamento jurídico gratuito através da APAV (116 006).")
+                    },
+                    {
+                        title: "Violência Sexual",
+                        text: "Qualquer ato sexual não consentido, coação ou imposição de práticas indesejadas mediante força ou ameaça.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.sexualViolence,
+                        action: () => openDetailModal("Violência Sexual", "A violência sexual manifesta-se através de qualquer ato sexual não consentido, coação, imposição de práticas sexuais indesejadas ou comentários desrespeitosos de cariz sexual, obtidos mediante força, ameaça ou aproveitamento de vulnerabilidade.<br><br>Constitui uma grave violação dos direitos fundamentais, da dignidade e da autodeterminação pessoal da vítima.<br><br><b>Como pedir ajuda:</b> Se a agressão foi recente, evite tomar banho ou alterar vestuário para preservar eventuais vestígios. Dirija-se de imediato a uma urgência hospitalar e contacte as autoridades.")
+                    },
+                    {
+                        title: "Stalking (Perseguição Persistente)",
+                        text: "Padrão repetido e indesejado de condutas persecutórias, como vigilância constante e envio maciço de mensagens.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.stalkingViolence,
+                        action: () => openDetailModal("Stalking (Perseguição Persistente)", "O stalking caracteriza-se por um padrão repetido e indesejado de condutas persecutórias, tais como vigilância constante, monitorização obsessiva de movimentos, rondas à residência ou local de trabalho, e envio maciço de mensagens.<br><br>Este comportamento invasivo gera na vítima um sentimento contínuo de insegurança, medo e ansiedade extrema face à sua privacidade.<br><br><b>Como pedir ajuda:</b> Guarde todas as provas digitais (capturas de ecrã, registos de chamadas e mensagens) e apresente denúncia imediata às autoridades policiais.")
+                    }
+                ]
+            },
+            procurar: {
+                title: "Procurar apoio",
+                desc: "Existem serviços nacionais gratuitos e confidenciais disponíveis 24h por dia. Não precisa de passar por isto sozinho(a).",
+                isSupportList: true,
+                lines: [
+                    {
+                        title: "1. Serviço Vítimas Violência Doméstica",
+                        hours: "Disponível 24 horas por dia (Gratuita)",
+                        phone: "800202148",
+                        displayPhone: "800 202 148",
+                        desc: "Linha telefónica confidencial com profissionais especializados no atendimento, informação e apoio a vítimas de violência doméstica."
+                    },
+                    {
+                        title: "2. Linha de Apoio à Vítima (APAV)",
+                        hours: "Dias úteis, das 09:00 às 21:00 (Gratuita)",
+                        phone: "116006",
+                        displayPhone: "116 006",
+                        desc: "Serviço de atendimento e apoio psicológico, social e jurídico prestado pela Associação Portuguesa de Apoio à Vítima."
+                    },
+                    {
+                        title: "3. Linha Nacional de Emergência Social",
+                        hours: "Disponível 24 horas por dia (Gratuita)",
+                        phone: "144",
+                        displayPhone: "144",
+                        desc: "Resposta imediata e encaminhamento para acolhimento em situações de emergência e proteção social urgente."
+                    },
+                    {
+                        title: "4. SMS Segurança (Pessoas Surdas)",
+                        hours: "Disponível 24 horas por dia",
+                        phone: "961010200",
+                        displayPhone: "961 010 200",
+                        desc: "Permite o envio de mensagem de texto (SMS) comunicada de imediato pelos operadores da GNR."
+                    },
+                    {
+                        title: "5. Linha LGBT (ILGA Portugal)",
+                        hours: "Quinta a Sábado, das 20:00 às 23:00",
+                        phone: "218873922",
+                        displayPhone: "218 873 922",
+                        desc: "Apoio telefónico, escuta ativa e informação especializada sobre questões de orientação sexual e identidade de género."
+                    },
+                    {
+                        title: "6. 112 - Emergência Nacional",
+                        hours: "Disponível 24 horas por dia (Gratuita)",
+                        phone: "112",
+                        displayPhone: "112",
+                        desc: "Contacto imediato das forças de segurança para situações de perigo iminente para a vida ou integridade física."
+                    }
+                ]
+            },
+            prestar: {
+                title: "Prestar apoio",
+                desc: "Muitas pessoas sentem dificuldades em saber qual é a melhor coisa a fazer ao apoiar alguém numa situação abusiva. Veja como pode ajudar em segurança.",
+                cards: [
+                    {
+                        title: "Ajudar uma Pessoa Amiga",
+                        text: "Aprenda a ouvir sem julgar, manter o contacto regular e ajudar a criar um plano discreto de segurança.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.friendsTalk,
+                        action: () => openDetailModal("Como Ajudar uma Pessoa Amiga", "<b>1. Escute com empatia:</b> Não julgue nem critique as decisões da vítima.<br><b>2. Respeite o ritmo:</b> Não a pressione a tomar decisões para as quais não se sente preparada.<br><b>3. Combine um sinal:</b> Estabeleça uma palavra-chave para emergências.")
+                    },
+                    {
+                        title: "Abandonar uma Relação Abusiva",
+                        text: "Orientações sobre como reunir documentos, preparar uma reserva de emergência e planear a saída com segurança.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.diarySecurity,
+                        action: () => openDetailModal("Abandonar uma Relação Abusiva", "<b>1. Plano de Saída:</b> Identifique um local seguro previamente.<br><b>2. Documentos:</b> Guarde cópias de CC, passaportes, cartões bancários e receitas médicas.<br><b>3. Telemóvel:</b> Mantenha a geolocalização desativada.")
+                    }
+                ]
+            },
+            seguranca: {
+                title: "Guia de Segurança Digital",
+                desc: "Esteja mais seguro(a) online. O nosso guia prático ajuda a blindar os seus dispositivos e contas digitais contra monitorizações indevidas.",
+                cards: [
+                    {
+                        title: "Endereço de Email",
+                        text: "Proteja o eixo central da sua identidade digital contra acessos não autorizados e recuperação indevida de contas.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.digitalEmail,
+                        action: () => openDetailModal("Segurança no Endereço de Email", "O correio eletrónico é frequentemente utilizado para recuperação de credenciais e notificações sensíveis.<br><br><b>Orientações Práticas:</b><br>• <b>Palavras-Passe Robustas:</b> Utilize chaves de acesso longas, complexas e exclusivas.<br>• <b>Autenticação de Dois Fatores (2FA):</b> Configure aplicações autenticadoras para uma camada extra de proteção.<br>• <b>Monitorização de Sessões:</b> Termine imediatamente sessões ativas desconhecidas.")
+                    },
+                    {
+                        title: "Browsers e Navegação",
+                        text: "Evite que o seu histórico de pesquisa e ficheiros temporários exponham consultas a linhas de apoio.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.digitalBrowser,
+                        action: () => openDetailModal("Segurança nos Browsers", "Os navegadores web armazenam históricos e cookies que podem expor pesquisas sensíveis.<br><br><b>Orientações Práticas:</b><br>• <b>Modos Privados:</b> Recorra a janelas anónimas para consultar conteúdos de apoio.<br>• <b>Higienização de Dados:</b> Efetue a limpeza regular da cache e histórico de navegação.")
+                    },
+                    {
+                        title: "Redes Sociais",
+                        text: "Controle a exposição pública de hábitos, contactos e localizações geográficas nas redes sociais.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.digitalSocial,
+                        action: () => openDetailModal("Segurança nas Redes Sociais", "As redes sociais expõem inadvertidamente padrões de comportamento e localização.<br><br><b>Orientações Práticas:</b><br>• <b>Restrição de Privacidade:</b> Configure os perfis com o nível máximo de privacidade.<br>• <b>Gestão de Localização:</b> Desative a marcação automática de coordenadas geográficas.")
+                    },
+                    {
+                        title: "Dispositivos Eletrónicos",
+                        text: "Proteja smartphones e computadores portáteis com códigos de acesso lógicos e bloqueios automáticos.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.digitalDevice,
+                        action: () => openDetailModal("Segurança em Dispositivos", "Smartphones e portáteis guardam ficheiros privados que requerem mecanismos rígidos.<br><br><b>Orientações Práticas:</b><br>• <b>Códigos Fortes:</b> Use PINs alfanuméricos complexos ou biometria.<br>• <b>Bloqueio Automático:</b> Reduza o tempo limite de inatividade para o bloqueio de ecrã.")
+                    },
+                    {
+                        title: "Aplicações de Mensagens",
+                        text: "Garanta a confidencialidade das comunicações instantâneas através de encriptação e eliminação temporária.",
+                        btn: "Saber Mais &rarr;",
+                        svg: svgGraphics.digitalMessage,
+                        action: () => openDetailModal("Segurança em Mensagens", "As mensagens devem ser encriptadas de ponta a ponta para impedir interceções.<br><br><b>Orientações Práticas:</b><br>• <b>Encriptação:</b> Utilize plataformas que protejam as mensagens de ponta a ponta.<br>• <b>Mensagens Temporárias:</b> Ative a eliminação automática de conversas sensíveis.")
+                    }
+                ]
+            },
+            sobre: {
+                title: "Sobre o Cubik",
+                desc: "Conheça a origem do projeto, a nossa visão de proteção social e a tecnologia desenvolvida para apoiar vítimas de violência doméstica de forma 100% segura e discreta.",
+                isAboutSection: true
+            }
+        };
+
+        // Redirecionamento de Saída Rápida para o Google Doodle Playground
+        function quickExit() {
+            window.location.replace("https://doodleplayground.com/");
+        }
+
+        // Alternar entre Abas
+        function switchTab(tabKey) {
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            
+            const links = document.querySelectorAll('.nav-link');
+            const keys = ['inicio', 'reconhecer', 'compreender', 'procurar', 'prestar', 'seguranca', 'sobre'];
+            const index = keys.indexOf(tabKey);
+            if (index !== -1 && links[index]) {
+                links[index].classList.add('active');
+            }
+
+            const data = tabData[tabKey];
+            document.getElementById('hero-title').innerText = data.title;
+            document.getElementById('hero-desc').innerText = data.desc;
+
+            const contentDiv = document.getElementById('tab-content');
+            contentDiv.innerHTML = '';
+
+            if (data.isAboutSection) {
+                contentDiv.innerHTML = `
+                    <div class="about-container">
+                        <div class="about-card">
+                            <h3>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18"/><path d="M15 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+                                O Projeto Cubik
+                            </h3>
+                            <p>
+                                O <b>Cubik</b> nasceu no âmbito da Prova de Aptidão Profissional (PAP) no curso de Gestão e Programação de Sistemas Informáticos da Escola Profissional Bento de Jesus Caraça (EPBJC), no Porto.
+                            </p>
+                            <p>
+                                O projeto surge da necessidade de oferecer uma resposta tecnológica moderna, segura e discreta para pessoas em situação de vulnerabilidade ou vítimas de violência doméstica, combinando uma aplicação móvel com disfarce interativo e um portal informativo acessível a qualquer navegador.
+                            </p>
+                        </div>
+
+                        <div class="about-card">
+                            <h3>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                A Nossa Missão e Princípios
+                            </h3>
+                            <p>
+                                Garantir que qualquer pessoa possa aceder a recursos de orientação, avaliar fatores de risco e guardar provas de agressões com total privacidade e sem deixar rastos visíveis no dispositivo.
+                            </p>
+
+                            <div class="about-values-grid">
+                                <div class="value-item">
+                                    <h4>Privacidade Absoluta</h4>
+                                    <p>Todos os registos do diário são encriptados localmente no telemóvel através de encriptação AES-256 e da tecnologia Hive.</p>
+                                </div>
+                                <div class="value-item">
+                                    <h4>Disfarce Eficaz</h4>
+                                    <p>A aplicação móvel camufla-se sob a forma de um jogo de blocos inofensivo, abrindo o painel secreto apenas com o código de resgate.</p>
+                                </div>
+                                <div class="value-item">
+                                    <h4>Acesso Imediato a Apoio</h4>
+                                    <p>Ligação direta a linhas nacionais gratuitas de emergência (112, 800 202 148, APAV 116 006) com um único clique.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="about-card">
+                            <h3>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                Arquitetura e Tecnologia
+                            </h3>
+                            <p>
+                                Desenvolvido com uma arquitetura focada no conceito <i>Offline First</i>: a aplicação móvel foi construída em <b>Flutter</b> e o portal web institucional em <b>HTML5, CSS3 e JavaScript</b> puro, assegurando máxima leveza, rapidez e facilidade de carregamento em qualquer dispositivo.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (data.isSupportList) {
+                let html = '<div class="support-list">';
+                data.lines.forEach(line => {
+                    html += `
+                        <div class="support-item-card">
+                            <div class="support-item-info">
+                                <div class="support-item-title">${line.title}</div>
+                                <div class="support-item-hours">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>
+                                    ${line.hours}
+                                </div>
+                                <div class="support-item-desc">${line.desc}</div>
+                            </div>
+                            <button class="card-btn primary" onclick="window.location.href='tel:${line.phone}'">Ligar ${line.displayPhone}</button>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                contentDiv.innerHTML = html;
+            } else {
+                let html = '<div class="cards-grid">';
+                data.cards.forEach((card, idx) => {
+                    html += `
+                        <div class="card">
+                            <div class="card-graphic">
+                                ${card.svg}
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">${card.title}</h3>
+                                <p class="card-text">${card.text}</p>
+                                <button class="card-btn" onclick="tabData['${tabKey}'].cards[${idx}].action()">${card.btn}</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                contentDiv.innerHTML = html;
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Questionário Inline
+        let currentQuizIndex = 0;
+        let quizAnswers = [];
+
+        const quizQuestionsForMe = [
+            'Sente medo ou apreensão constante perante a reação do(a) seu(sua) parceiro(a)?',
+            'O(A) seu(sua) parceiro(a) controla com quem fala, redes sociais ou como se veste?',
+            'Sente-se isolado(a) da sua família ou amigos devido à pressão do(a) parceiro(a)?',
+            'O(A) seu(sua) parceiro(a) já ameaçou fazer-lhe mal, às crianças ou animais?',
+            'O(A) seu(sua) parceiro(a) controla o seu dinheiro ou impede-o(a) de trabalhar?',
+            'Recebe chamadas ou mensagens obsessivas para prestar contas de onde está?',
+            'Já existiu alguma tentativa de estrangulamento ou agressão física direta?',
+            'Houve uma separação recente e enfrentou forte resistência ou ameaças?'
+        ];
+
+        function startInlineQuiz(forMe) {
+            currentQuizIndex = 0;
+            quizAnswers = [];
+            renderInlineQuizQuestion();
+        }
+
+        function renderInlineQuizQuestion() {
+            const contentDiv = document.getElementById('tab-content');
+            
+            if (currentQuizIndex < quizQuestionsForMe.length) {
+                contentDiv.innerHTML = `
+                    <div class="quiz-container">
+                        <div class="quiz-counter">${currentQuizIndex + 1} / ${quizQuestionsForMe.length}</div>
+                        <h2 class="quiz-question-text">${quizQuestionsForMe[currentQuizIndex]}</h2>
+                        <div class="quiz-answers-group">
+                            <button class="quiz-ans-btn" onclick="answerInlineQuiz('sim')">Sim</button>
+                            <button class="quiz-ans-btn" onclick="answerInlineQuiz('nao')">Não</button>
+                            <button class="quiz-ans-btn" onclick="answerInlineQuiz('talvez')">Não tenho a certeza</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const simCount = quizAnswers.filter(a => a === 'sim').length;
+                const highRisk = simCount >= 3;
+                contentDiv.innerHTML = `
+                    <div class="quiz-container">
+                        <h2 style="color: ${highRisk ? 'var(--coral)' : 'var(--teal)'}; font-size: 26px; font-weight: 800; margin-bottom: 16px;">
+                            ${highRisk ? 'Indicadores Elevados de Risco' : 'Indicadores Moderados de Risco'}
+                        </h2>
+                        <p style="font-size: 16px; color: var(--text-main); margin-bottom: 24px; line-height: 1.6;">
+                            ${highRisk 
+                                ? 'A sua situação apresenta sinais claros de risco que exigem proteção urgente. Recomendamos contactar a linha de apoio gratuita e confidencial (800 202 148).' 
+                                : 'Existem alguns sinais de alerta na relação. Mantenha-se atento(a) e consulte os guias de segurança.'}
+                        </p>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                            <button class="card-btn primary" onclick="window.location.href='tel:800202148'">Ligar 800 202 148</button>
+                            <button class="card-btn" onclick="switchTab('reconhecer')">Voltar ao início</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function answerInlineQuiz(answer) {
+            quizAnswers.push(answer);
+            currentQuizIndex++;
+            renderInlineQuizQuestion();
+        }
+
+        function openDiaryInfo() {
+            const body = document.getElementById('modal-body');
+            body.innerHTML = `
+                <h3 style="color: var(--text-main); font-size: 22px; font-weight: 800; margin-bottom: 16px;">O Diário Seguro da Aplicação Cubik</h3>
+                <p style="font-size: 14px; color: var(--text-sub); line-height: 1.6; margin-bottom: 16px;">
+                    Na nossa aplicação móvel, o Diário Seguro permite registar episódios com data, hora, descrição, fotografias e áudios.
+                </p>
+                <div style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--teal); margin-bottom: 20px;">
+                    <p style="font-size: 13px; color: var(--teal); font-weight: 700;">&check; Encriptação Local AES-256 (Hive)</p>
+                    <p style="font-size: 13px; color: var(--teal); font-weight: 700; margin-top: 6px;">&check; Acesso Disfarçado via Jogo de Blocos</p>
+                    <p style="font-size: 13px; color: var(--teal); font-weight: 700; margin-top: 6px;">&check; Exportação por E-mail e Limpeza Imediata</p>
+                </div>
+            `;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        function openDetailModal(title, content) {
+            const body = document.getElementById('modal-body');
+            body.innerHTML = `
+                <h3 style="color: var(--text-main); font-size: 20px; font-weight: 800; margin-bottom: 16px;">${title}</h3>
+                <div style="font-size: 14px; color: var(--text-sub); line-height: 1.6;">${content}</div>
+            `;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        // Inicializar com a aba de Início
+        switchTab('inicio');
+    </script>
+</body>
+</html>
