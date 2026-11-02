@@ -1189,14 +1189,6 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
   final _confirmController = TextEditingController();
   String? _message;
   bool _success = false;
-  bool _loading = true;
-  String _currentPin = '1234';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPin();
-  }
 
   @override
   void dispose() {
@@ -1206,30 +1198,22 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
     super.dispose();
   }
 
-  Future<void> _loadPin() async {
-    final pin = await SecretCodeService.getSecretCode();
-    setState(() {
-      _currentPin = pin;
-      _loading = false;
-    });
-  }
-
   Future<void> _changePin() async {
-    if (_currentController.text.trim() != _currentPin) {
+    final isCurrentValid = await SecretCodeService.validateCode(_currentController.text);
+    if (!isCurrentValid) {
       setState(() { _message = 'Código atual incorreto.'; _success = false; });
       return;
     }
-    if (_newController.text.trim().length < 4) {
-      setState(() { _message = 'O novo código deve ter pelo menos 4 caracteres.'; _success = false; });
+    if (_newController.text.trim().length < 6) {
+      setState(() { _message = 'O novo código deve ter pelo menos 6 caracteres.'; _success = false; });
       return;
     }
     if (_newController.text.trim() != _confirmController.text.trim()) {
-      setState(() { _message = 'Os códigos não coincidem.'; _success = false; });
+      setState(() { _message = 'Os novos códigos não coincidem.'; _success = false; });
       return;
     }
     await SecretCodeService.setSecretCode(_newController.text.trim());
     setState(() {
-      _currentPin = _newController.text.trim();
       _message = 'Código alterado com sucesso!';
       _success = true;
       _currentController.clear();
@@ -1242,9 +1226,7 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Alterar Código Secreto')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF48A9A6)))
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
@@ -1303,6 +1285,141 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildField(TextEditingController ctrl, String label) {
+    return TextField(
+      controller: ctrl,
+      obscureText: true,
+      keyboardType: TextInputType.number,
+      style: const TextStyle(color: Color(0xFFF1DAC4)),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF48A9A6)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF48A9A6)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF48A9A6), width: 2),
+        ),
+        prefixIcon: const Icon(Icons.lock, color: Color(0xFF48A9A6)),
+      ),
+    );
+  }
+}
+
+// =====================================================================
+// 8. CONFIGURAÇÃO OBRIGATÓRIA DO PRIMEIRO PIN PESSOAL
+// =====================================================================
+class SetupInitialPinScreen extends StatefulWidget {
+  const SetupInitialPinScreen({super.key});
+
+  @override
+  State<SetupInitialPinScreen> createState() => _SetupInitialPinScreenState();
+}
+
+class _SetupInitialPinScreenState extends State<SetupInitialPinScreen> {
+  final _newController = TextEditingController();
+  final _confirmController = TextEditingController();
+  String? _message;
+
+  @override
+  void dispose() {
+    _newController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveInitialPin() async {
+    final pin = _newController.text.trim();
+    if (pin.length < 6) {
+      setState(() => _message = 'O código deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (pin != _confirmController.text.trim()) {
+      setState(() => _message = 'Os códigos não coincidem.');
+      return;
+    }
+
+    await SecretCodeService.setSecretCode(pin);
+
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => Theme(
+          data: dashboardTheme,
+          child: ChangeNotifierProvider<DashboardModel>(
+            create: (_) => DashboardModel(),
+            child: const HiddenDashboard(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Configuração de Segurança')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            const Icon(Icons.shield_outlined, size: 64, color: Color(0xFF48A9A6)),
+            const SizedBox(height: 16),
+            const Text(
+              'Definir Código Secreto Pessoal',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Para garantir que apenas você acede a este painel, defina um código pessoal (mínimo 6 dígitos). O código inicial 1234 deixará de funcionar.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, height: 1.4, color: Color(0xFFF1DAC4)),
+            ),
+            const SizedBox(height: 28),
+            _buildField(_newController, 'Novo Código Secreto'),
+            const SizedBox(height: 16),
+            _buildField(_confirmController, 'Confirmar Novo Código'),
+            const SizedBox(height: 20),
+            if (_message != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFC86B68).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Color(0xFFC86B68)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _message!,
+                        style: const TextStyle(color: Color(0xFFC86B68)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF48A9A6),
+                foregroundColor: const Color(0xFF18243A),
+                minimumSize: const Size(double.infinity, 52),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: _saveInitialPin,
+              child: const Text('Guardar e Aceder ao Painel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

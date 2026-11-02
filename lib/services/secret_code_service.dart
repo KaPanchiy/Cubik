@@ -1,30 +1,45 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SecretCodeService {
-  static const String _prefKey = 'secret_access_code';
+  static const String _hashPrefKey = 'secret_access_code_hash';
   static const String defaultCode = '1234';
+  static const String _salt = 'cubik_pap_salt_sec_2026';
 
-  /// Obtém a senha secreta atual (retorna '1234' por defeito se ainda não foi personalizada)
-  static Future<String> getSecretCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_prefKey) ?? defaultCode;
+  /// Gera hash SHA-256 seguro com sal
+  static String hashPin(String pin) {
+    final bytes = utf8.encode(pin.trim() + _salt);
+    return sha256.convert(bytes).toString();
   }
 
-  /// Indica se o utilizador já definiu um código próprio personalizado
+  /// Indica se o utilizador já definiu o seu próprio código pessoal
   static Future<bool> hasCustomCode() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey(_prefKey);
+    return prefs.containsKey(_hashPrefKey);
   }
 
-  /// Guarda uma nova senha secreta definida pelo utilizador
+  /// Guarda apenas o hash criptográfico do novo PIN escolhido pelo utilizador (mínimo 6 caracteres)
   static Future<bool> setSecretCode(String newCode) async {
+    final trimmed = newCode.trim();
+    if (trimmed.length < 6) return false;
     final prefs = await SharedPreferences.getInstance();
-    return await prefs.setString(_prefKey, newCode.trim());
+    final hash = hashPin(trimmed);
+    return await prefs.setString(_hashPrefKey, hash);
   }
 
-  /// Valida se o código introduzido coincide com a senha secreta
+  /// Valida se o código introduzido coincide com o hash guardado (ou com '1234' para primeira configuração)
   static Future<bool> validateCode(String inputCode) async {
-    final currentCode = await getSecretCode();
-    return inputCode.trim().toLowerCase() == currentCode.trim().toLowerCase();
+    final trimmed = inputCode.trim();
+    final hasCustom = await hasCustomCode();
+    final prefs = await SharedPreferences.getInstance();
+
+    if (hasCustom) {
+      final storedHash = prefs.getString(_hashPrefKey);
+      return hashPin(trimmed) == storedHash;
+    } else {
+      // Se ainda não personalizou o PIN, aceita o código padrão para poder configurar
+      return trimmed == defaultCode;
+    }
   }
 }

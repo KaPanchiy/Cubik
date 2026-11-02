@@ -95,18 +95,33 @@ class _RedeemCodeDialogState extends State<RedeemCodeDialog> {
     if (!mounted) return;
 
     if (isValidSecret) {
+      final hasCustom = await SecretCodeService.hasCustomCode();
+      if (!mounted) return;
       Navigator.of(context).pop();
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => Theme(
-            data: dashboardTheme,
-            child: ChangeNotifierProvider<DashboardModel>(
-              create: (_) => DashboardModel(),
-              child: const HiddenDashboard(),
+
+      if (!hasCustom) {
+        // Primeira utilização: obriga a configurar código pessoal de pelo menos 6 dígitos
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => Theme(
+              data: dashboardTheme,
+              child: const SetupInitialPinScreen(),
             ),
           ),
-        ),
-      );
+        );
+      } else {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => Theme(
+              data: dashboardTheme,
+              child: ChangeNotifierProvider<DashboardModel>(
+                create: (_) => DashboardModel(),
+                child: const HiddenDashboard(),
+              ),
+            ),
+          ),
+        );
+      }
     } else {
       setState(() {
         _isLoading = false;

@@ -76,17 +76,21 @@ class IncidentEntry {
     );
   }
 
-  /// Mapa para persistência no Cloud Firestore
-  Map<String, dynamic> toFirestore() {
-    return {
+  /// Mapa para persistência no Cloud Firestore.
+  /// O createdAt só é gravado na criação inicial da ocorrência para preservar a credibilidade legal do registo.
+  Map<String, dynamic> toFirestore({bool isNew = true}) {
+    final map = <String, dynamic>{
       'title': title,
       'date': Timestamp.fromDate(date),
       'category': category,
       'severity': severity,
-      'description': description, // Guardada cifrada
-      'createdAt': FieldValue.serverTimestamp(),
+      'description': description, // Guardada cifrada com AES-256
       'updatedAt': FieldValue.serverTimestamp(),
     };
+    if (isNew) {
+      map['createdAt'] = FieldValue.serverTimestamp();
+    }
+    return map;
   }
 
   /// Cria instância a partir de documento do Cloud Firestore
