@@ -98,9 +98,12 @@ class _RedeemCodeDialogState extends State<RedeemCodeDialog> {
       Navigator.of(context).pop();
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ChangeNotifierProvider<DashboardModel>(
-            create: (_) => DashboardModel(),
-            child: const HiddenDashboard(),
+          builder: (context) => Theme(
+            data: dashboardTheme,
+            child: ChangeNotifierProvider<DashboardModel>(
+              create: (_) => DashboardModel(),
+              child: const HiddenDashboard(),
+            ),
           ),
         ),
       );

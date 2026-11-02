@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'services/diary_screen.dart';
 import 'services/secret_code_service.dart';
 
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => DashboardModel(),
-      child: const MyApp(),
-    ),
-  );
+// Abre o discador nativo com o número indicado.
+Future<void> _launchPhone(String number) async {
+  final uri = Uri.parse('tel:$number');
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri);
+  }
 }
+
+final ThemeData dashboardTheme = ThemeData(
+  scaffoldBackgroundColor: const Color(0xFF18243A),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFF18243A),
+    foregroundColor: Color(0xFFF1DAC4),
+    elevation: 0,
+  ),
+  textTheme: const TextTheme(
+    bodyMedium: TextStyle(color: Color(0xFFF1DAC4)),
+    titleMedium: TextStyle(color: Color(0xFFF1DAC4)),
+  ),
+);
 
 class DashboardModel extends ChangeNotifier {
   int _currentIndex = 0;
@@ -31,31 +44,6 @@ class DashboardModel extends ChangeNotifier {
   ];
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Painel de Apoio',
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF18243A),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF18243A),
-          foregroundColor: Color(0xFFF1DAC4),
-          elevation: 0,
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Color(0xFFF1DAC4)),
-          titleMedium: TextStyle(color: Color(0xFFF1DAC4)),
-        ),
-      ),
-      home: const HiddenDashboard(),
-    );
-  }
-}
-
 class HiddenDashboard extends StatelessWidget {
   const HiddenDashboard({super.key});
 
@@ -69,31 +57,34 @@ class HiddenDashboard extends StatelessWidget {
       const EmergencyScreen(),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Não está sozinho(a)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4))),
-      ),
-      body: bottomScreens[model.currentIndex],
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFC86B68),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.exit_to_app),
-        label: const Text('Sair Rápido', style: TextStyle(fontWeight: FontWeight.bold)),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: model.currentIndex,
-        backgroundColor: const Color(0xFF18243A),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF48A9A6),
-        unselectedItemColor: const Color(0xFFF1DAC4).withValues(alpha: 0.6),
-        onTap: (index) => model.setIndex(index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Diário'),
-          BottomNavigationBarItem(icon: Icon(Icons.phone), label: '112'),
-        ],
+    return Theme(
+      data: dashboardTheme,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Não está sozinho(a)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4))),
+        ),
+        body: bottomScreens[model.currentIndex],
+        floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: const Color(0xFFC86B68),
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.exit_to_app),
+          label: const Text('Sair Rápido', style: TextStyle(fontWeight: FontWeight.bold)),
+          onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: model.currentIndex,
+          backgroundColor: const Color(0xFF18243A),
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: const Color(0xFF48A9A6),
+          unselectedItemColor: const Color(0xFFF1DAC4).withValues(alpha: 0.6),
+          onTap: (index) => model.setIndex(index),
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Diário'),
+            BottomNavigationBarItem(icon: Icon(Icons.phone), label: '112'),
+          ],
+        ),
       ),
     );
   }
@@ -121,7 +112,12 @@ class HomeGridViewContent extends StatelessWidget {
           title: item['title'],
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => item['screen']),
+            MaterialPageRoute(
+              builder: (context) => Theme(
+                data: dashboardTheme,
+                child: item['screen'],
+              ),
+            ),
           ),
         );
       },
@@ -1099,10 +1095,27 @@ class ResourcesScreen extends StatelessWidget {
                   Text(res['description']!, style: const TextStyle(fontSize: 14, height: 1.4, color: Color(0xFFF1DAC4))),
                   const SizedBox(height: 8),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(Icons.phone, size: 16, color: Color(0xFF48A9A6)),
-                      const SizedBox(width: 6),
-                      Text('Contacto: ${res['phone']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF48A9A6))),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone, size: 16, color: Color(0xFF48A9A6)),
+                          const SizedBox(width: 6),
+                          Text('Contacto: ${res['phone']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF48A9A6))),
+                        ],
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF48A9A6),
+                          foregroundColor: const Color(0xFF18243A),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        icon: const Icon(Icons.call, size: 16),
+                        label: const Text('Ligar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        onPressed: () => _launchPhone(res['phone']!),
+                      ),
                     ],
                   ),
                 ],
@@ -1151,9 +1164,7 @@ class EmergencyScreen extends StatelessWidget {
               ),
               icon: const Icon(Icons.call),
               label: const Text('Ligar 112 Agora', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              onPressed: () {
-                debugPrint('Chamada de emergência 112 acionada');
-              },
+              onPressed: () => _launchPhone('112'),
             ),
           ],
         ),

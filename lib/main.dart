@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart'; // <-- 1. Importa o Firebase Core
 import 'screens/home_screen.dart';
 
-void main() {
+void main() async { // <-- 2. Adiciona 'async' aqui
+  // 3. Garante que os bindings do Flutter estão prontos antes de chamar serviços nativos
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 4. Inicializa o Firebase
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -11,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PAP - Cubik',
+      title: 'Cubik',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),

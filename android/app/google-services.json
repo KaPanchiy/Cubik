@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "836011897288",
+    "project_id": "cubik-acc33",
+    "storage_bucket": "cubik-acc33.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836011897288:android:611fbae50d20b5542d10fd",
+        "android_client_info": {
+          "package_name": "com.pap.cubik"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA7IdX8sRXFRRKeNGJB0jzfmRtPsrRR7U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
