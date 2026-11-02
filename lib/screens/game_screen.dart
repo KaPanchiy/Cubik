@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../modelos/board.dart';
 import '../modelos/piece.dart';
 import '../widgets/game_board_widget.dart';
 import '../widgets/redeem_code_dialog.dart';
+import '../services/score_service.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -193,10 +193,14 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _loadHighScore() async {
-    final prefs = await SharedPreferences.getInstance();
+    final score = await ScoreService.getHighScore(
+      onRemoteUpdated: (remoteScore) {
+        if (mounted) setState(() => highScore = remoteScore);
+      },
+    );
     if (mounted) {
       setState(() {
-        highScore = prefs.getInt('block_blast_high_score') ?? 0;
+        highScore = score;
       });
     }
   }
@@ -206,8 +210,7 @@ class _GameScreenState extends State<GameScreen> {
       setState(() {
         highScore = board.score;
       });
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('block_blast_high_score', highScore);
+      await ScoreService.saveHighScore(highScore);
     }
   }
 

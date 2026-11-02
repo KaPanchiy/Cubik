@@ -1,23 +1,6 @@
 import 'package:flutter/material.dart';
-
-// Modelo de dados de uma ocorrência do Diário
-class JournalEntry {
-  final String id;
-  final String title;
-  final DateTime dateTime;
-  final String description;
-  final String category;
-  final int severity; // 1 = Baixa, 2 = Média, 3 = Alta
-
-  JournalEntry({
-    required this.id,
-    required this.title,
-    required this.dateTime,
-    required this.description,
-    this.category = 'Outro',
-    this.severity = 1,
-  });
-}
+import '../modelos/incident_model.dart';
+import 'diary_repository.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -27,13 +10,62 @@ class DiaryScreen extends StatefulWidget {
 }
 
 class _DiaryScreenState extends State<DiaryScreen> {
-  final List<JournalEntry> _entries = [];
+  List<IncidentEntry> _entries = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEntries();
+  }
+
+  Future<void> _loadEntries() async {
+    setState(() => _isLoading = true);
+    final entries = await DiaryRepository.getEntries();
+    if (mounted) {
+      setState(() {
+        _entries = entries;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _deleteEntry(IncidentEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF18243A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Eliminar Ocorrência', style: TextStyle(color: Color(0xFFF1DAC4))),
+        content: const Text(
+          'Tem a certeza de que deseja eliminar este registo? Esta ação apagará o registo local e da nuvem.',
+          style: TextStyle(color: Color(0xFFF1DAC4)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF48A9A6))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC86B68)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Eliminar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await DiaryRepository.deleteEntry(entry.id);
+      _loadEntries();
+    }
+  }
 
   void _openNewEntryModal() {
     final titleController = TextEditingController();
     final descController = TextEditingController();
     String selectedCategory = 'Outro';
-    int selectedSeverity = 1;
+    String selectedSeverity = 'Baixa';
     DateTime selectedDate = DateTime.now();
 
     final categories = [
@@ -108,9 +140,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          border: const BorderSide(color: Color(0xFF48A9A6)).toPaint().strokeWidth == 0
-                              ? null
-                              : null,
                           color: const Color(0xFF23324D),
                         ),
                         child: Row(
@@ -175,11 +204,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _severityChip(setModalState, 1, 'Baixa', const Color(0xFF48A9A6), selectedSeverity, (v) => selectedSeverity = v),
+                        _severityChip(setModalState, 'Baixa', const Color(0xFF48A9A6), selectedSeverity, (v) => selectedSeverity = v),
                         const SizedBox(width: 8),
-                        _severityChip(setModalState, 2, 'Média', Colors.orange, selectedSeverity, (v) => selectedSeverity = v),
+                        _severityChip(setModalState, 'Média', Colors.orange, selectedSeverity, (v) => selectedSeverity = v),
                         const SizedBox(width: 8),
-                        _severityChip(setModalState, 3, 'Alta', const Color(0xFFC86B68), selectedSeverity, (v) => selectedSeverity = v),
+                        _severityChip(setModalState, 'Alta', const Color(0xFFC86B68), selectedSeverity, (v) => selectedSeverity = v),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -190,7 +219,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       maxLines: 4,
                       style: const TextStyle(color: Color(0xFFF1DAC4)),
                       decoration: InputDecoration(
-                        labelText: 'Descrição do incidente',
+                        labelText: 'Descrição do incidente (cifrada no envio)',
                         labelStyle: const TextStyle(color: Color(0xFF48A9A6)),
                         alignLabelWithHint: true,
                         enabledBorder: OutlineInputBorder(
@@ -213,19 +242,21 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.save),
-                      label: const Text('Guardar Registo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      onPressed: () {
+                      label: const Text('Guardar Registo Cifrado', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      onPressed: () async {
                         if (titleController.text.trim().isEmpty) return;
-                        final entry = JournalEntry(
+                        final entry = IncidentEntry(
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
                           title: titleController.text.trim(),
-                          dateTime: selectedDate,
+                          date: selectedDate,
                           description: descController.text.trim(),
                           category: selectedCategory,
                           severity: selectedSeverity,
                         );
-                        setState(() => _entries.insert(0, entry));
+
                         Navigator.pop(context);
+                        await DiaryRepository.saveEntry(entry);
+                        _loadEntries();
                       },
                     ),
                     const SizedBox(height: 24),
@@ -241,11 +272,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   Widget _severityChip(
     StateSetter setModalState,
-    int value,
-    String label,
+    String value,
     Color color,
-    int selected,
-    Function(int) onSelected,
+    String selected,
+    Function(String) onSelected,
   ) {
     final isSelected = selected == value;
     return Expanded(
@@ -260,7 +290,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ),
           child: Center(
             child: Text(
-              label,
+              value,
               style: TextStyle(
                 color: isSelected ? color : const Color(0xFFF1DAC4),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -273,118 +303,122 @@ class _DiaryScreenState extends State<DiaryScreen> {
     );
   }
 
-  Color _severityColor(int severity) {
-    switch (severity) {
-      case 3: return const Color(0xFFC86B68);
-      case 2: return Colors.orange;
-      default: return const Color(0xFF48A9A6);
-    }
-  }
-
-  String _severityLabel(int severity) {
-    switch (severity) {
-      case 3: return 'Alta';
-      case 2: return 'Média';
-      default: return 'Baixa';
+  Color _severityColor(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'alta':
+      case 'elevado':
+        return const Color(0xFFC86B68);
+      case 'média':
+      case 'medio':
+        return Colors.orange;
+      default:
+        return const Color(0xFF48A9A6);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _entries.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.book_outlined, size: 72, color: const Color(0xFF48A9A6).withValues(alpha: 0.4)),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Nenhum registo ainda',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF48A9A6)))
+          : _entries.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.book_outlined, size: 72, color: const Color(0xFF48A9A6).withValues(alpha: 0.4)),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Nenhum registo ainda',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Toque no botão + para registar uma ocorrência segura',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14, color: Color(0xFFF1DAC4)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Toque no botão + para registar uma ocorrência',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Color(0xFFF1DAC4)),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _entries.length,
-              itemBuilder: (context, index) {
-                final entry = _entries[index];
-                final color = _severityColor(entry.severity);
-                return Card(
-                  color: const Color(0xFF23324D),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(color: color.withValues(alpha: 0.5)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _entries.length,
+                  itemBuilder: (context, index) {
+                    final entry = _entries[index];
+                    final color = _severityColor(entry.severity);
+                    return Card(
+                      color: const Color(0xFF23324D),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(color: color.withValues(alpha: 0.5)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                entry.title,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    entry.title,
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF1DAC4)),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: color.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    entry.severity,
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, size: 20, color: Color(0xFFC86B68)),
+                                  tooltip: 'Eliminar registo',
+                                  onPressed: () => _deleteEntry(entry),
+                                ),
+                              ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                _severityLabel(entry.severity),
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
-                              ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today, size: 13, color: const Color(0xFF48A9A6).withValues(alpha: 0.7)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${entry.date.day.toString().padLeft(2, '0')}/${entry.date.month.toString().padLeft(2, '0')}/${entry.date.year}',
+                                  style: TextStyle(fontSize: 12, color: const Color(0xFFF1DAC4).withValues(alpha: 0.7)),
+                                ),
+                                const SizedBox(width: 12),
+                                Icon(Icons.label_outline, size: 13, color: const Color(0xFF48A9A6).withValues(alpha: 0.7)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  entry.category,
+                                  style: TextStyle(fontSize: 12, color: const Color(0xFFF1DAC4).withValues(alpha: 0.7)),
+                                ),
+                              ],
                             ),
+                            if (entry.description.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                entry.description,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 13, height: 1.4, color: const Color(0xFFF1DAC4).withValues(alpha: 0.85)),
+                              ),
+                            ],
                           ],
                         ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today, size: 13, color: const Color(0xFF48A9A6).withValues(alpha: 0.7)),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${entry.dateTime.day.toString().padLeft(2, '0')}/${entry.dateTime.month.toString().padLeft(2, '0')}/${entry.dateTime.year}',
-                              style: TextStyle(fontSize: 12, color: const Color(0xFFF1DAC4).withValues(alpha: 0.7)),
-                            ),
-                            const SizedBox(width: 12),
-                            Icon(Icons.label_outline, size: 13, color: const Color(0xFF48A9A6).withValues(alpha: 0.7)),
-                            const SizedBox(width: 4),
-                            Text(
-                              entry.category,
-                              style: TextStyle(fontSize: 12, color: const Color(0xFFF1DAC4).withValues(alpha: 0.7)),
-                            ),
-                          ],
-                        ),
-                        if (entry.description.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            entry.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 13, height: 1.4, color: const Color(0xFFF1DAC4).withValues(alpha: 0.85)),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF48A9A6),
         foregroundColor: const Color(0xFF18243A),

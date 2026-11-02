@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'game_codes.dart';
 
 /// Gere o boost de pontuação 2x do código BLOCK2026.
 /// - Máximo de 3 usos por dia (reset à meia-noite)
@@ -10,7 +11,7 @@ class BoostService {
 
   /// Verifica se o código introduzido é o código de boost (case-insensitive)
   static bool isBoostCode(String code) =>
-      code.trim().toLowerCase() == 'block2026';
+      code.trim().toLowerCase() == GameCodes.boostCode.toLowerCase();
 
   /// Devolve quantas vezes o boost foi usado hoje
   static Future<int> getUsesToday() async {

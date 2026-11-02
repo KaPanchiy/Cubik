@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cubik/main.dart';
 import 'package:cubik/modelos/board.dart';
 import 'package:cubik/services/boost_service.dart';
+import 'package:cubik/services/game_codes.dart';
+import 'package:cubik/services/encryption_service.dart';
 
 void main() {
   testWidgets('Cubik app smoke test', (WidgetTester tester) async {
@@ -31,6 +33,31 @@ void main() {
       expect(BoostService.isBoostCode('block2026'), isTrue);
       expect(BoostService.isBoostCode('Block2026'), isTrue);
       expect(BoostService.isBoostCode('INVALIDO'), isFalse);
+    });
+  });
+
+  group('Encryption & Game Codes Tests', () {
+    test('Cifra e decifra texto corretamente com o PIN', () {
+      const pin = '1234';
+      const originalText = 'Relato de incidente confidencial';
+      final encrypted = EncryptionService.encrypt(originalText, pin);
+
+      expect(encrypted, isNot(originalText));
+      expect(EncryptionService.isEncrypted(encrypted), isTrue);
+
+      final decrypted = EncryptionService.decrypt(encrypted, pin);
+      expect(decrypted, originalText);
+    });
+
+    test('Decifra com PIN errado falha com segurança', () {
+      final encrypted = EncryptionService.encrypt('Segredo', '1234');
+      final decrypted = EncryptionService.decrypt(encrypted, '9999');
+      expect(decrypted, isNot('Segredo'));
+    });
+
+    test('Códigos de jogo coincidem com constantes', () {
+      expect(GameCodes.boostCode, 'BLOCK2026');
+      expect(GameCodes.reviveCode, 'REVIVE');
     });
   });
 }
