@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId = "com.pap.cubik"
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
